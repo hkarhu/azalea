@@ -1,33 +1,27 @@
 package fi.uef.azalea;
 
-import java.util.HashMap;
-
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import fi.uef.azalea.camera.ResizeableOrthographicCamera;
+import fi.uef.azalea.game.CardImageData;
 import fi.uef.azalea.game.GameScreen;
 
 public class Azalea extends ApplicationAdapter implements ApplicationListener, InputProcessor {
 	
 	public static final String TITLE = "Azalea 0.1b";
-	public static final float cardSize = 128f;
-	public static final float cardMargin = 0.1f;
+	public static final float cardMargin = 12f;
 	
 	private SpriteBatch spriteBatch;
 	private DecalBatch decalBatch;
@@ -36,10 +30,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 	private Screen currentScreen;
 	private GameScreen gameScreen;
 	
-	private HashMap<Integer, Vector3> touchPoints;
-	
 	public Azalea() {
-		touchPoints = new HashMap<>();
 		gameScreen = new GameScreen();
 	}
 
@@ -56,19 +47,18 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 		spriteBatch = new SpriteBatch();
 		
 		FileHandle[] files = Gdx.files.local("cards/testset/").list();
-		Array<TextureRegion> inputTextures = new Array<>();
+		Array<CardImageData> inputImages = new Array<>();
 		System.out.println(Gdx.files.getLocalStoragePath());
 		for(FileHandle file: files) {
 			TextureRegion tr = new TextureRegion(new Texture(file));
-			inputTextures.add(tr);
+			inputImages.add(new CardImageData(file, tr));
 		}
 		
-		gameScreen.initGame(inputTextures);
+		gameScreen.initGame(inputImages, 2); //Pairs only, for now
 		
 		currentScreen = gameScreen;
 		
 		Gdx.input.setInputProcessor(this);
-		
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
@@ -89,11 +79,6 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		decalBatch.flush();
 		
-	}
-	
-	private void initCamera(){
-		
-
 	}
 	
 	@Override
@@ -129,14 +114,9 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		Vector3 tp = new Vector3(screenX, screenY, 1);
-		System.out.println("project:" + tp);
-		System.out.println(camera.far + " " + camera.near);
-		camera.unproject(tp);
-		System.out.println("unproject:" + tp);
-		float r = 1;//(Gdx.graphics.getHeight()/(float)Gdx.graphics.getWidth())*10;
-		Vector2 tp2 = new Vector2(tp.x, tp.y);
-		currentScreen.handleTouchPoint(tp2);
+		Vector3 tp3 = new Vector3(screenX, screenY, 1);
+		camera.unproject(tp3);
+		currentScreen.handleTouchPoint(tp3.x, tp3.y);
 		return false;
 	}
 

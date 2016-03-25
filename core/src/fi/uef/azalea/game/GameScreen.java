@@ -17,18 +17,22 @@ import fi.uef.azalea.Screen;
 import fi.uef.azalea.StaticTextures;
 
 public class GameScreen extends Screen {
+	
+	public static float cardSize = 0f;
 
 	private int guesses = 0;
-	private Array<Card> cardsInPlay = null;
+	private int max_tries = 0;
+	private Array<CardGroup> groupsInPlay = null;
+	private Array<CardInstance> openedCards = null;
 
-	private Decal background;
+	public void initGame(Array<CardImageData> inputData, int numCardsInGroup){
 
-	public void initGame(Array<TextureRegion> inputTextures){
-
+		max_tries = numCardsInGroup;
 		guesses = 0;
-		cardsInPlay = new Array<>();
+		groupsInPlay = new Array<>();
+		openedCards = new Array<>();
 
-		int n = inputTextures.size;
+		int n = inputData.size*numCardsInGroup;
 		System.out.println("Will use " + n + " cards.");
 
 		//Getting the needed amount of primes (all primes less than the target number)
@@ -79,28 +83,39 @@ public class GameScreen extends Screen {
 			}
 		}
 
-		System.out.println("Using " + width + "x" + height + " board.");
+		System.out.println("Using " + width + "x" + height + " board."); 
 		
-		float xShift = (width-1)*(Azalea.cardSize + Azalea.cardMargin)*0.5f;
-		float yShift = (height-1)*(Azalea.cardSize + Azalea.cardMargin)*0.5f;
-		int i = 0;
-		for(TextureRegion tr : inputTextures){
-			cardsInPlay.add(new Card("tag:"+i, tr, new Vector2((i%width)*(Azalea.cardSize + Azalea.cardMargin)-xShift,(i/width)*(Azalea.cardSize + Azalea.cardMargin)-yShift)));
-			i++;
+		if(Gdx.graphics.getHeight() > Gdx.graphics.getWidth()){
+			cardSize = (Gdx.graphics.getWidth()-(width*Azalea.cardMargin))/(float)width;
+		} else {
+			cardSize = (Gdx.graphics.getHeight()-(height*Azalea.cardMargin))/(float)height;
+		}
+		
+		float xShift = (width-1)*(cardSize + Azalea.cardMargin)*0.5f;
+		float yShift = (height-1)*(cardSize + Azalea.cardMargin)*0.5f;
+		
+		//List and shuffle positions
+		Array<Vector2> positions = new Array<>();		
+		for(int i=0; i < n; i++){
+			positions.add(new Vector2((i%width)*(cardSize + Azalea.cardMargin)-xShift,(i/width)*(cardSize + Azalea.cardMargin)-yShift));
+		}
+		positions.shuffle();
+		positions.shuffle();
+		
+		for(CardImageData d : inputData){
+			Array<Vector2> pos = new Array<>();
+			for(int i=0; i < numCardsInGroup; i++){
+				pos.add(positions.pop());
+			}
+			groupsInPlay.add(new CardGroup(d, pos));
 		}	
-
-	}
-
-	@Override
-	public void init() {
 
 	}
 
 	@Override
 	public void render(SpriteBatch sp, DecalBatch db) {
 		sp.draw(StaticTextures.PLAYGROUND_BACKGROUND, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-		for(Card c : cardsInPlay){
+		for(CardGroup c : groupsInPlay){
 			c.render(db);
 		}
 	}
@@ -130,9 +145,14 @@ public class GameScreen extends Screen {
 	}
 
 	@Override
-	public void handleTouchPoint(Vector2 point) {
-		for(Card c : cardsInPlay){
-			c.isHit(point);
+	public void handleTouchPoint(float x, float y) {
+		if(openedCards.size >= max_tries){
+			//TODO: close opened cards if no success
+		} else {
+			for(CardGroup c : groupsInPlay){
+				CardInstance ci = c.processTouch(x, y);
+				if(ci != null) openedCards.add(ci); //TODO: FINISH THIS! now only opens not closes
+			}
 		}
 	}
 
