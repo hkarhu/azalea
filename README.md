@@ -10,6 +10,8 @@ Enable multilib @ /etc/pacman.conf
 yaourt -S --noconfirm android-sdk android-sdk-platform-tools android-sdk-build-tools 
 groupadd sdkusers && gpasswd -a <user> sdkusers
 chown -R :sdkusers /opt/android-sdk/ && chmod -R g+w /opt/android-sdk/
+
+#quick switch group on this terminal
 newgrp sdkusers
 
 Select platform and install it:

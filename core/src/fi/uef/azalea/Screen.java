@@ -13,5 +13,6 @@ public abstract class Screen {
 	public abstract void pause();
 	public abstract void resume();
 	public abstract void handleTouchPoint(float x, float y);
+	public abstract boolean done();
 	
 }

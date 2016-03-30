@@ -1,9 +1,11 @@
 package fi.uef.azalea.game;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
@@ -17,20 +19,35 @@ import fi.uef.azalea.Screen;
 import fi.uef.azalea.StaticTextures;
 
 public class GameScreen extends Screen {
-	
-	public static float cardSize = 0f;
 
+	public static float cardSize = 0f;
+	private static float cardScaler = 1f;
+	
 	private int guesses = 0;
 	private int max_tries = 0;
-	private Array<CardGroup> groupsInPlay = null;
-	private Array<CardInstance> openedCards = null;
+	
+	private Array<Card> cardsInPlay = null;
+	private Array<Card> openedCards = null;
+	private HashMap<Integer, CardImageData> cardImages;
+
+	private Vector3 screenShowPosition_L = new Vector3(0,0,0);
+	private Vector3 screenShowPosition_R = new Vector3(0,0,0);
+	
+	private Decal darkenDecal;
+
+	//Game states and animations
+	private enum GameStates { pick, show_wrong, show_success, hide }
+	private GameStates lastState = null;
+	private GameStates currentState = GameStates.pick;
+	private float transition = 0;
 
 	public void initGame(Array<CardImageData> inputData, int numCardsInGroup){
-
+		
 		max_tries = numCardsInGroup;
 		guesses = 0;
-		groupsInPlay = new Array<>();
-		openedCards = new Array<>();
+		cardsInPlay = new Array<Card>();
+		openedCards = new Array<Card>();
+		cardImages = new HashMap<Integer, CardImageData>();
 
 		int n = inputData.size*numCardsInGroup;
 		System.out.println("Will use " + n + " cards.");
@@ -38,7 +55,7 @@ public class GameScreen extends Screen {
 		//Getting the needed amount of primes (all primes less than the target number)
 		ArrayList<Integer> primes = new ArrayList<Integer>();
 		primes.add(2); //yay
-		for(int f=2; f <= n; f++){
+		for(int f=2; f <= (n/2)+1; f++){
 			boolean prime = true;
 			for(int a=2; a <= Math.ceil(Math.sqrt(f)); a++){
 				if(f%a == 0){
@@ -69,61 +86,118 @@ public class GameScreen extends Screen {
 		System.out.println("Factors for " + n + ": " + factors);
 
 		//Calculating optimal board size
-		float whRatio = Gdx.graphics.getWidth()/Gdx.graphics.getHeight();
+		float whRatio = Gdx.graphics.getWidth()/(float)Gdx.graphics.getHeight();
 		System.out.println("Screen ratio: " + whRatio);
 
-		int width = 1;
-		int height = 1;
+		int gridWidth = 1;
+		int gridHeight = 1;
 
 		while(!factors.isEmpty()){
-			if(width/height <= whRatio){
-				width *= factors.pollLast();
+			if(gridWidth/gridHeight <= whRatio){
+				gridWidth *= factors.pollLast();
 			} else {
-				height *= factors.pollLast();
+				gridHeight *= factors.pollLast();
 			}
 		}
 
-		System.out.println("Using " + width + "x" + height + " board."); 
+		System.out.println("Using " + gridWidth + "x" + gridHeight + " board.");
 		
 		if(Gdx.graphics.getHeight() > Gdx.graphics.getWidth()){
-			cardSize = (Gdx.graphics.getWidth()-(width*Azalea.cardMargin))/(float)width;
+			cardSize = (Gdx.graphics.getWidth()-(gridWidth*Azalea.cardMargin) - Azalea.screenMargin)/(float)gridWidth;
+			cardScaler = (Gdx.graphics.getWidth()-Azalea.showMargin)/cardSize;
 		} else {
-			cardSize = (Gdx.graphics.getHeight()-(height*Azalea.cardMargin))/(float)height;
+			cardSize = (Gdx.graphics.getHeight()-(gridHeight*Azalea.cardMargin) - Azalea.screenMargin)/(float)gridHeight;
+			cardScaler = (Gdx.graphics.getHeight()-Azalea.showMargin)/cardSize;
 		}
-		
-		float xShift = (width-1)*(cardSize + Azalea.cardMargin)*0.5f;
-		float yShift = (height-1)*(cardSize + Azalea.cardMargin)*0.5f;
-		
-		//List and shuffle positions
-		Array<Vector2> positions = new Array<>();		
+
+		float xShift = (gridWidth-1)*(cardSize + Azalea.cardMargin)*0.5f;
+		float yShift = (gridHeight-1)*(cardSize + Azalea.cardMargin)*0.5f;
+
+		//Make positions
+		Array<Vector2> positions = new Array<Vector2>();		
 		for(int i=0; i < n; i++){
-			positions.add(new Vector2((i%width)*(cardSize + Azalea.cardMargin)-xShift,(i/width)*(cardSize + Azalea.cardMargin)-yShift));
+			positions.add(new Vector2((i%gridWidth)*(cardSize + Azalea.cardMargin)-xShift,(i/gridWidth)*(cardSize + Azalea.cardMargin)-yShift));
 		}
+
+		//Shuffle positions
 		positions.shuffle();
 		positions.shuffle();
-		
+
+		//Make card "groups" (pairs) and give cards predefined positions.
+		int groupID = 0;
 		for(CardImageData d : inputData){
-			Array<Vector2> pos = new Array<>();
+			cardImages.put(groupID, d);
+
+			//assign positions per card
 			for(int i=0; i < numCardsInGroup; i++){
-				pos.add(positions.pop());
+				cardsInPlay.add(new Card(groupID, d.texture, positions.pop()));
 			}
-			groupsInPlay.add(new CardGroup(d, pos));
+
+			groupID++;
 		}	
 
+		//Other gui stuff
+		darkenDecal = Decal.newDecal(new TextureRegion(StaticTextures.DARKEN_MASK), true);
+		darkenDecal.setPosition(0, 0, -cardSize+1);
+		
 	}
 
 	@Override
 	public void render(SpriteBatch sp, DecalBatch db) {
+
 		sp.draw(StaticTextures.PLAYGROUND_BACKGROUND, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		for(CardGroup c : groupsInPlay){
+
+		//if transitioning
+		if(transition > 0){
+			transition -= Gdx.graphics.getDeltaTime()*0.8f;
+		} else {
+			transition = 0;
+		}
+
+		Color cf = darkenDecal.getColor();
+		
+		switch (currentState) {
+			case show_success:
+				
+			case hide:
+				if(transition > 0){			
+					cf.a = transition;
+					darkenDecal.setColor(cf);
+					db.add(darkenDecal);
+				}
+				break;
+				
+			case show_wrong:
+				if(transition > 0){
+					cf.a = (1-transition);
+					darkenDecal.setColor(cf);
+				}
+				db.add(darkenDecal);
+				if(openedCards.get(0).position.x > openedCards.get(1).position.x){
+					openedCards.get(0).lerpTowards(screenShowPosition_R);
+					openedCards.get(1).lerpTowards(screenShowPosition_L);
+				} else {
+					openedCards.get(1).lerpTowards(screenShowPosition_R);
+					openedCards.get(0).lerpTowards(screenShowPosition_L);
+				}
+				
+				openedCards.get(1).zoom_amount = (1-transition)*cardScaler;
+				openedCards.get(0).zoom_amount = (1-transition)*cardScaler;
+				break;
+
+		}
+
+		for(Card c : cardsInPlay){
 			c.render(db);
 		}
+
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		// TODO Auto-generated method stub
-
+		screenShowPosition_L = new Vector3(-width*0.25f, 0, 0);
+		screenShowPosition_R = new Vector3(width*0.25f, 0, 0);
+		darkenDecal.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 
 	@Override
@@ -145,15 +219,76 @@ public class GameScreen extends Screen {
 	}
 
 	@Override
+	public boolean done() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+
+	@Override
 	public void handleTouchPoint(float x, float y) {
-		if(openedCards.size >= max_tries){
-			//TODO: close opened cards if no success
-		} else {
-			for(CardGroup c : groupsInPlay){
-				CardInstance ci = c.processTouch(x, y);
-				if(ci != null) openedCards.add(ci); //TODO: FINISH THIS! now only opens not closes
-			}
+
+		if(transition > 0){
+			transition = 0; 
+			return;
 		}
+
+		switch (currentState) {
+			case show_success:
+				cardsInPlay.removeAll(openedCards, true);
+				openedCards.clear();
+				swapState(GameStates.pick);
+				break;
+				
+			case show_wrong: //Hasten cleaning up, go directly to hide
+				for(Card c : openedCards){
+					c.setOpen(false);
+				}
+				swapState(GameStates.hide);
+				break;
+	
+			case hide:
+				for(Card c : openedCards){
+					c.resetPosition(); //Make sure all cards return to origin
+				}
+				openedCards.clear();
+				swapState(GameStates.pick);
+				//break; //No break here to go directly to pick (special case because we need to reset only after transitioning)
+				
+			case pick:
+				for(Card c : cardsInPlay){
+					if(c.opened == false && c.isHit(x, y)){
+						c.setOpen(true);
+						openedCards.add(c);
+					}
+				}
+				if(openedCards.size >= max_tries){
+					guesses++;
+					
+					swapState(GameStates.show_wrong);
+					boolean allSame = true;
+					Card lastCard = null;
+					for(Card c : openedCards){
+						if(lastCard != null && lastCard.getGroup() != c.getGroup()) allSame = false;
+						lastCard = c;
+					}
+					if(allSame){
+						swapState(GameStates.show_success);
+					} else {
+						swapState(GameStates.show_wrong);
+					}
+				}
+				break;
+	
+			default:
+				break;
+		}
+	}
+
+	private void swapState(GameStates newState) {
+		lastState = currentState;
+		currentState = newState;
+		transition = 1;
 	}
 
 }

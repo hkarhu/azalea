@@ -11,11 +11,14 @@ public class StaticTextures {
 	public static Texture CARD_MASK = new Texture(Gdx.files.internal("card_mask.png"));
 	public static Texture PLAYGROUND_BACKGROUND = new Texture(Gdx.files.internal("gray_bg.png"));
 	public static Texture IMAGE_FULLVIEW_BACKGROUND = new Texture(Gdx.files.internal("gray_bg.png"));
+	public static Texture DARKEN_MASK = new Texture(Gdx.files.internal("darkenmask.png"));
 	
 	static {
 		
 		PLAYGROUND_BACKGROUND.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		PLAYGROUND_BACKGROUND.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
+		
+		DARKEN_MASK.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
 	}
 	
