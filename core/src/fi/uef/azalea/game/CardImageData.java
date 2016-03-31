@@ -1,17 +1,28 @@
 package fi.uef.azalea.game;
 
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.TextureData;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.sun.corba.se.impl.orb.ParserTable.TestAcceptor1;
 
 public class CardImageData {
 	
-	public FileHandle sourceFile;
-	public TextureRegion texture;
+	public final FileHandle sourceFile;
+	public final TextureRegion cardTexture;
 	
-	public CardImageData(FileHandle sourceFile, TextureRegion texture) {
+	public CardImageData(FileHandle sourceFile) {
 		this.sourceFile = sourceFile;
-		this.texture = texture;
+		TextureData textureData = TextureData.Factory.loadFromFile(sourceFile, Format.RGB565, false);
+		Texture t = new Texture(textureData);
+		t.setFilter(TextureFilter.Linear, TextureFilter.Linear);
+		this.cardTexture = new TextureRegion(t);
+	}
+	
+	public TextureRegion getOriginalImage(){
+		TextureRegion original = new TextureRegion(new Texture(sourceFile));
+		return original;
 	}
 
 }

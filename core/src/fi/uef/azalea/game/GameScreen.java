@@ -34,12 +34,20 @@ public class GameScreen extends Screen {
 	private Vector3 screenShowPosition_R = new Vector3(0,0,0);
 	
 	private Decal darkenDecal;
+	private Decal prizeDecal;
 
 	//Game states and animations
 	private enum GameStates { pick, show_wrong, show_success, hide }
 	private GameStates lastState = null;
 	private GameStates currentState = GameStates.pick;
 	private float transition = 0;
+	
+	public GameScreen() {
+		//Other gui stuff
+		TextureRegion darken = new TextureRegion(StaticTextures.DARKEN_MASK);
+		darkenDecal = Decal.newDecal(darken, true);
+		prizeDecal = Decal.newDecal(darken, false);
+	}
 
 	public void initGame(Array<CardImageData> inputData, int numCardsInGroup){
 		
@@ -130,21 +138,23 @@ public class GameScreen extends Screen {
 
 			//assign positions per card
 			for(int i=0; i < numCardsInGroup; i++){
-				cardsInPlay.add(new Card(groupID, d.texture, positions.pop()));
+				cardsInPlay.add(new Card(groupID, d.cardTexture, positions.pop()));
 			}
 
 			groupID++;
 		}	
-
-		//Other gui stuff
-		darkenDecal = Decal.newDecal(new TextureRegion(StaticTextures.DARKEN_MASK), true);
-		darkenDecal.setPosition(0, 0, -cardSize+1);
+		
+		//Other gui stuff here
+		darkenDecal.setPosition(0, 0, -cardSize*0.5f);
+		prizeDecal.setPosition(0, 0, -cardSize*0.5f+1);
 		
 	}
 
 	@Override
 	public void render(SpriteBatch sp, DecalBatch db) {
 
+		prizeDecal.setPosition(0, 0, -cardSize*0.5f+1);
+		
 		sp.draw(StaticTextures.PLAYGROUND_BACKGROUND, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		//if transitioning
@@ -157,13 +167,23 @@ public class GameScreen extends Screen {
 		Color cf = darkenDecal.getColor();
 		
 		switch (currentState) {
-			case show_success:
-				
+			case show_success: //Set prize image as the target and show it
+				if(transition > 0){			
+					cf.a = 1-transition;
+					darkenDecal.setColor(cf);
+				}
+				db.add(darkenDecal);
+				db.add(prizeDecal);
+				break;
 			case hide:
 				if(transition > 0){			
 					cf.a = transition;
 					darkenDecal.setColor(cf);
 					db.add(darkenDecal);
+					if(lastState == GameStates.show_success){
+						prizeDecal.setScale(transition);
+						db.add(prizeDecal);
+					}
 				}
 				break;
 				
@@ -183,6 +203,9 @@ public class GameScreen extends Screen {
 				
 				openedCards.get(1).zoom_amount = (1-transition)*cardScaler;
 				openedCards.get(0).zoom_amount = (1-transition)*cardScaler;
+				break;
+				
+			default:
 				break;
 
 		}
@@ -226,18 +249,17 @@ public class GameScreen extends Screen {
 
 
 	@Override
-	public void handleTouchPoint(float x, float y) {
+	public void handleTouchPoint(float x, float y, int id) {
 
 		if(transition > 0){
 			transition = 0; 
-			return;
 		}
 
 		switch (currentState) {
 			case show_success:
 				cardsInPlay.removeAll(openedCards, true);
 				openedCards.clear();
-				swapState(GameStates.pick);
+				swapState(GameStates.hide);
 				break;
 				
 			case show_wrong: //Hasten cleaning up, go directly to hide
@@ -273,6 +295,21 @@ public class GameScreen extends Screen {
 						lastCard = c;
 					}
 					if(allSame){
+						CardImageData d = cardImages.get(lastCard.getGroup());
+						TextureRegion tr = d.getOriginalImage();
+						prizeDecal.setTextureRegion(tr);
+						prizeDecal.setScale(1);
+						//TODO: get prize scaling from previous code
+						float pWidth = tr.getRegionWidth();
+						float pHeight = tr.getRegionHeight();
+						float s = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) - Azalea.screenMargin*0.5f;
+						if(pWidth > pHeight){
+							prizeDecal.setWidth(s);
+							prizeDecal.setHeight(s*(pHeight/pWidth));
+						} else {
+							prizeDecal.setWidth(s*(pWidth/pHeight));
+							prizeDecal.setHeight(s);
+						}
 						swapState(GameStates.show_success);
 					} else {
 						swapState(GameStates.show_wrong);

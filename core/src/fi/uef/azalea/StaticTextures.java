@@ -17,7 +17,6 @@ public class StaticTextures {
 		
 		PLAYGROUND_BACKGROUND.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		PLAYGROUND_BACKGROUND.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
-		
 		DARKEN_MASK.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		
 	}

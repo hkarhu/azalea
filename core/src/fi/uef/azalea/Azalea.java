@@ -6,15 +6,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
+import com.sun.xml.internal.ws.api.model.wsdl.editable.EditableWSDLBoundFault;
 
 import fi.uef.azalea.camera.ResizeableOrthographicCamera;
+import fi.uef.azalea.editor.EditorScreen;
 import fi.uef.azalea.game.CardImageData;
 import fi.uef.azalea.game.GameScreen;
 
@@ -31,13 +31,18 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 	
 	private Screen currentScreen;
 	private GameScreen gameScreen;
+	private MenuScreen menuScreen;
+	private EditorScreen editorScreen;
 	
 	public Azalea() {
-		gameScreen = new GameScreen();
+		
 	}
 
 	@Override
 	public void create () {
+		
+		//Screens need to be created here because constructors might need to access the render threads
+		gameScreen = new GameScreen();
 		
 		camera = new ResizeableOrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.01f;
@@ -52,8 +57,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 		Array<CardImageData> inputImages = new Array<CardImageData>();
 		System.out.println(Gdx.files.getLocalStoragePath());
 		for(FileHandle file: files) {
-			TextureRegion tr = new TextureRegion(new Texture(file));
-			inputImages.add(new CardImageData(file, tr));
+			inputImages.add(new CardImageData(file));
 		}
 		
 		gameScreen.initGame(inputImages, 2); //Pairs only, for now
@@ -65,12 +69,14 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
+		
 	}
 	
 	@Override
 	public void render () {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
+		
 		spriteBatch.begin();
 		currentScreen.render(spriteBatch, decalBatch);
 		spriteBatch.end();
@@ -91,6 +97,8 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 	public void dispose() {
 		super.dispose();
 		decalBatch.dispose();
+		spriteBatch.dispose();
+		gameScreen.dispose();
 	}
 
 	@Override
@@ -115,7 +123,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 		Vector3 tp3 = new Vector3(screenX, screenY, 1);
 		camera.unproject(tp3);
-		currentScreen.handleTouchPoint(tp3.x, tp3.y);
+		currentScreen.handleTouchPoint(tp3.x, tp3.y, pointer);
 		return false;
 	}
 
@@ -141,4 +149,17 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	@Override
+	public void pause() {
+		super.pause();
+		if(currentScreen != null) currentScreen.pause();
+	}
+	
+	@Override
+	public void resume() {
+		super.resume();
+		if(currentScreen != null) currentScreen.resume();
+	}
+	
 }
