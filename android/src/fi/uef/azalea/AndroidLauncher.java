@@ -1,11 +1,7 @@
 package fi.uef.azalea;
 
-import android.os.Bundle;
-
-import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
-import fi.uef.azalea.Azalea;
 
 public class AndroidLauncher extends AndroidApplication {
 	@Override

@@ -11,7 +11,8 @@ import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.sun.xml.internal.ws.api.model.wsdl.editable.EditableWSDLBoundFault;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import fi.uef.azalea.camera.ResizeableOrthographicCamera;
 import fi.uef.azalea.editor.EditorScreen;
@@ -41,28 +42,14 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 	@Override
 	public void create () {
 		
-		//Screens need to be created here because constructors might need to access the render threads
-		gameScreen = new GameScreen();
-		
 		camera = new ResizeableOrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.near = 0.01f;
 		camera.far = 300f;
+		camera.direction.set(0, 0, -1);
 		camera.position.set(0, 0, camera.far*0.5f);
-		camera.update();
 		
 		decalBatch = new DecalBatch(new CameraGroupStrategy(camera));
 		spriteBatch = new SpriteBatch();
-		
-		FileHandle[] files = Gdx.files.internal("cards/testset/").list();
-		Array<CardImageData> inputImages = new Array<CardImageData>();
-		System.out.println(Gdx.files.getLocalStoragePath());
-		for(FileHandle file: files) {
-			inputImages.add(new CardImageData(file));
-		}
-		
-		gameScreen.initGame(inputImages, 2); //Pairs only, for now
-		
-		currentScreen = gameScreen;
 		
 		Gdx.input.setInputProcessor(this);
 		Gdx.gl.glClearColor(0, 0, 0, 1);
@@ -70,26 +57,45 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
 		Gdx.gl.glCullFace(GL20.GL_BACK);
 		
+		Gdx.gl20.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		Gdx.gl20.glEnable(GL20.GL_BLEND);
+	
+		//Screens need to be created here because constructors might need to access the render threads
+		gameScreen = new GameScreen();
+		menuScreen = new MenuScreen();
+		editorScreen = new EditorScreen();
+
+		/*
+		FileHandle[] files = Gdx.files.internal("cards/testset/").list();
+		Array<CardImageData> inputImages = new Array<CardImageData>();
+		System.out.println(Gdx.files.getLocalStoragePath());
+		for(FileHandle file: files) {
+			inputImages.add(new CardImageData(file));
+		}
+		gameScreen.initGame(inputImages, 2); //Pairs only, for now
+		currentScreen = gameScreen; */
+		
+		currentScreen = editorScreen;		
 	}
 	
 	@Override
 	public void render () {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
 		
+		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
 		spriteBatch.begin();
 		currentScreen.render(spriteBatch, decalBatch);
 		spriteBatch.end();
+		
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		decalBatch.flush();
+		
 	}
 	
 	@Override
 	public void resize(int width, int height) {
 		super.resize(width, height);
-		camera.resize(width, height);
-		camera.position.set(0, 0, camera.far*0.5f);
-		camera.update();
+		camera.updateViewport();
 		if(currentScreen != null) currentScreen.resize(width, height);
 	}
 	

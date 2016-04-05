@@ -6,17 +6,20 @@ import java.util.LinkedList;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
+import com.badlogic.gdx.maps.tiled.TiledMapTile.BlendMode;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
 import fi.uef.azalea.Azalea;
 import fi.uef.azalea.Screen;
-import fi.uef.azalea.StaticTextures;
+import fi.uef.azalea.Statics;
 
 public class GameScreen extends Screen {
 
@@ -30,8 +33,8 @@ public class GameScreen extends Screen {
 	private Array<Card> openedCards = null;
 	private HashMap<Integer, CardImageData> cardImages;
 
-	private Vector3 screenShowPosition_L = new Vector3(0,0,0);
-	private Vector3 screenShowPosition_R = new Vector3(0,0,0);
+	private Vector3 screenShowPosition_L = new Vector3(0,0,100);
+	private Vector3 screenShowPosition_R = new Vector3(0,0,100);
 	
 	private Decal darkenDecal;
 	private Decal prizeDecal;
@@ -44,7 +47,7 @@ public class GameScreen extends Screen {
 	
 	public GameScreen() {
 		//Other gui stuff
-		TextureRegion darken = new TextureRegion(StaticTextures.DARKEN_MASK);
+		TextureRegion darken = new TextureRegion(Statics.DARKEN_MASK);
 		darkenDecal = Decal.newDecal(darken, true);
 		prizeDecal = Decal.newDecal(darken, false);
 	}
@@ -145,23 +148,25 @@ public class GameScreen extends Screen {
 		}	
 		
 		//Other gui stuff here
-		darkenDecal.setPosition(0, 0, -cardSize*0.5f);
-		prizeDecal.setPosition(0, 0, -cardSize*0.5f+1);
+		darkenDecal.setBlending(GL20.GL_DST_COLOR, GL20.GL_ONE_MINUS_SRC_ALPHA); //Blending "multiply"
+		darkenDecal.setPosition(0, 0, 1);
+		prizeDecal.setPosition(0, 0, 100);
 		
 	}
 
 	@Override
-	public void render(SpriteBatch sp, DecalBatch db) {
-
-		prizeDecal.setPosition(0, 0, -cardSize*0.5f+1);
-		
-		sp.draw(StaticTextures.PLAYGROUND_BACKGROUND, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+	public void render(SpriteBatch sp, DecalBatch db) {		
+		sp.draw(Statics.PLAYGROUND_BACKGROUND, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		//if transitioning
 		if(transition > 0){
 			transition -= Gdx.graphics.getDeltaTime()*0.8f;
 		} else {
 			transition = 0;
+		}
+		
+		for(Card c : cardsInPlay){
+			c.render(db);
 		}
 
 		Color cf = darkenDecal.getColor();
@@ -209,17 +214,13 @@ public class GameScreen extends Screen {
 				break;
 
 		}
-
-		for(Card c : cardsInPlay){
-			c.render(db);
-		}
-
+		
 	}
 
 	@Override
 	public void resize(int width, int height) {
-		screenShowPosition_L = new Vector3(-width*0.25f, 0, 0);
-		screenShowPosition_R = new Vector3(width*0.25f, 0, 0);
+		screenShowPosition_L = new Vector3(-width*0.25f, 0, 100);
+		screenShowPosition_R = new Vector3(width*0.25f, 0, 100);
 		darkenDecal.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 

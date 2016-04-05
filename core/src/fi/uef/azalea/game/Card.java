@@ -1,6 +1,7 @@
 package fi.uef.azalea.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
@@ -9,7 +10,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
-import fi.uef.azalea.StaticTextures;
+import fi.uef.azalea.Statics;
 
 public class Card {
 
@@ -31,10 +32,10 @@ public class Card {
 	public Card(int groupID, TextureRegion texture, Vector2 position) {
 		this.group = groupID;
 		this.cardFrontDecal = Decal.newDecal(texture, true);
-		this.cardBackDecal = Decal.newDecal(new TextureRegion(StaticTextures.CARD_BACK), true);
+		this.cardBackDecal = Decal.newDecal(new TextureRegion(Statics.CARD_BACK), true);
 		dimensions.setPosition(position);
 
-		this.position = new Vector3(dimensions.x, dimensions.y, -GameScreen.cardSize);
+		this.position = new Vector3(dimensions.x, dimensions.y, 0);
 		
 		cardFrontDecal.setPosition(this.position);
 		cardBackDecal.setPosition(this.position);
