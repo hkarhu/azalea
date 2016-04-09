@@ -3,37 +3,29 @@ package fi.uef.azalea;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
-import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
+import com.badlogic.gdx.utils.Select;
+import com.sun.org.apache.bcel.internal.generic.LoadClass;
 
-import fi.uef.azalea.camera.ResizeableOrthographicCamera;
-import fi.uef.azalea.editor.EditorScreen;
 import fi.uef.azalea.game.CardImageData;
 import fi.uef.azalea.game.GameScreen;
 
-public class Azalea extends ApplicationAdapter implements ApplicationListener, InputProcessor {
+public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	
-	public static final String TITLE = "Azalea 0.1b";
-	public static final float cardMargin = 2f; //How much space between cards
-	public static final float showMargin = 400f; //Margin when large preview of wrong pair shown
-	public static final float screenMargin = 32f; //How much space between the screen and card matrix
+	private static SetSelectorScreen setSelector;
+	private static GameScreen gameScreen; 
+	private static MainMenu mainMenu;
+	 
+	public enum AppState { menu, game, edit, select };
+	public static AppState currentState = AppState.menu;
+	private static Screen currentScreen;
 	
+	//Loading screen
 	private SpriteBatch spriteBatch;
-	private DecalBatch decalBatch;
-	private ResizeableOrthographicCamera camera;
-	
-	private Screen currentScreen;
-	private GameScreen gameScreen;
-	private MenuScreen menuScreen;
-	private EditorScreen editorScreen;
+	private static float load_transition = 1;
 	
 	public Azalea() {
 		
@@ -42,118 +34,75 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener, I
 	@Override
 	public void create () {
 		
-		camera = new ResizeableOrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		camera.near = 0.01f;
-		camera.far = 300f;
-		camera.direction.set(0, 0, -1);
-		camera.position.set(0, 0, camera.far*0.5f);
-		
-		decalBatch = new DecalBatch(new CameraGroupStrategy(camera));
+		//Loading screen stuff
 		spriteBatch = new SpriteBatch();
-		
-		Gdx.input.setInputProcessor(this);
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
-		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
-		Gdx.gl.glCullFace(GL20.GL_BACK);
-		
-		Gdx.gl20.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-		Gdx.gl20.glEnable(GL20.GL_BLEND);
-	
-		//Screens need to be created here because constructors might need to access the render threads
-		gameScreen = new GameScreen();
-		menuScreen = new MenuScreen();
-		editorScreen = new EditorScreen();
 
-		/*
-		FileHandle[] files = Gdx.files.internal("cards/testset/").list();
-		Array<CardImageData> inputImages = new Array<CardImageData>();
-		System.out.println(Gdx.files.getLocalStoragePath());
-		for(FileHandle file: files) {
-			inputImages.add(new CardImageData(file));
-		}
-		gameScreen.initGame(inputImages, 2); //Pairs only, for now
-		currentScreen = gameScreen; */
-		
-		currentScreen = editorScreen;		
+		//Screens need to be created here because constructors might need to access the render threads
+		mainMenu = new MainMenu();
+		setSelector = new SetSelectorScreen();
+		gameScreen = new GameScreen();
+
+		changeState(AppState.select);
+
 	}
 	
 	@Override
 	public void render () {
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		/*
+		if(load_transition > 0){
+			spriteBatch.begin();
+			spriteBatch.setColor(0, 0, 0, 1-load_transition);
+			spriteBatch.draw(Statics.LOADING, 0, 0);
+			spriteBatch.end();
+			
+			load_transition -= 0.01f;
+		}*/
+	
+		if(currentScreen.ready){
+			currentScreen.render();
+		}	
 		
-		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
-		spriteBatch.begin();
-		currentScreen.render(spriteBatch, decalBatch);
-		spriteBatch.end();
+	}
+	
+	//Toggle screens and handle diipadaapa
+	public static void changeState(AppState newState){
+		load_transition = 1;
+		switch (newState) {
+			case game:
+				gameScreen.ready = false;
+				currentScreen = gameScreen;
+				gameScreen.setBoard(setSelector.getCards(), 2); //Pairs only, for now
+				break;
+				
+			case menu:
+				currentScreen = mainMenu;
+				break;
+				
+			case select:
+				currentScreen = setSelector;
+				break;
+	
+			default:
+				System.out.println("Something went wrong.");
+				break;
+		}
 		
-		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
-		decalBatch.flush();
-		
+		currentScreen.init();
+		currentScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		currentState = newState;
 	}
 	
 	@Override
 	public void resize(int width, int height) {
 		super.resize(width, height);
-		camera.updateViewport();
 		if(currentScreen != null) currentScreen.resize(width, height);
 	}
 	
 	@Override
 	public void dispose() {
 		super.dispose();
-		decalBatch.dispose();
-		spriteBatch.dispose();
+		mainMenu.dispose();
 		gameScreen.dispose();
-	}
-
-	@Override
-	public boolean keyDown(int keycode) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean keyUp(int keycode) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean keyTyped(char character) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-		Vector3 tp3 = new Vector3(screenX, screenY, 1);
-		camera.unproject(tp3);
-		currentScreen.handleTouchPoint(tp3.x, tp3.y, pointer);
-		return false;
-	}
-
-	@Override
-	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public boolean mouseMoved(int screenX, int screenY) {
-		return false;
-	}
-
-	@Override
-	public boolean scrolled(int amount) {
-		// TODO Auto-generated method stub
-		return false;
 	}
 	
 	@Override

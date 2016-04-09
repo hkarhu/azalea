@@ -5,23 +5,26 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
-import com.badlogic.gdx.maps.tiled.TiledMapTile.BlendMode;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
+import fi.uef.azalea.Statics;
+import fi.uef.azalea.Azalea.AppState;
 import fi.uef.azalea.Azalea;
 import fi.uef.azalea.Screen;
 import fi.uef.azalea.Statics;
+import fi.uef.azalea.camera.ResizeableOrthographicCamera;
 
-public class GameScreen extends Screen {
+public class GameScreen extends Screen implements InputProcessor {
 
 	public static float cardSize = 0f;
 	private static float cardScaler = 1f;
@@ -40,19 +43,38 @@ public class GameScreen extends Screen {
 	private Decal prizeDecal;
 
 	//Game states and animations
-	private enum GameStates { pick, show_wrong, show_success, hide }
+	private enum GameStates { pick, show_wrong, show_success, hide, end }
 	private GameStates lastState = null;
 	private GameStates currentState = GameStates.pick;
 	private float transition = 0;
 	
+	private SpriteBatch spriteBatch;
+	private DecalBatch decalBatch;
+	private ResizeableOrthographicCamera camera;
+	
 	public GameScreen() {
+		camera = new ResizeableOrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		
+		decalBatch = new DecalBatch(new CameraGroupStrategy(camera));
+		spriteBatch = new SpriteBatch();
+		
 		//Other gui stuff
 		TextureRegion darken = new TextureRegion(Statics.DARKEN_MASK);
 		darkenDecal = Decal.newDecal(darken, true);
-		prizeDecal = Decal.newDecal(darken, false);
+		prizeDecal = Decal.newDecal(darken, true);
+		darkenDecal.setBlending(GL20.GL_DST_COLOR, GL20.GL_ONE_MINUS_SRC_ALPHA); //Blending "multiply"
+		darkenDecal.setPosition(0, 0, 1);
+		darkenDecal.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		prizeDecal.setPosition(0, 0, 100);
+	}
+	
+	private void swapState(GameStates newState) {
+		lastState = currentState;
+		currentState = newState;
+		transition = 1;
 	}
 
-	public void initGame(Array<CardImageData> inputData, int numCardsInGroup){
+	public void setBoard(Array<CardImageData> inputData, int numCardsInGroup){
 		
 		max_tries = numCardsInGroup;
 		guesses = 0;
@@ -114,20 +136,20 @@ public class GameScreen extends Screen {
 		System.out.println("Using " + gridWidth + "x" + gridHeight + " board.");
 		
 		if(Gdx.graphics.getHeight() > Gdx.graphics.getWidth()){
-			cardSize = (Gdx.graphics.getWidth()-(gridWidth*Azalea.cardMargin) - Azalea.screenMargin)/(float)gridWidth;
-			cardScaler = (Gdx.graphics.getWidth()-Azalea.showMargin)/cardSize;
+			cardSize = (Gdx.graphics.getWidth()-(gridWidth*Statics.cardMargin) - Statics.screenMargin)/(float)gridWidth;
+			cardScaler = (Gdx.graphics.getWidth()-Statics.showMargin)/cardSize;
 		} else {
-			cardSize = (Gdx.graphics.getHeight()-(gridHeight*Azalea.cardMargin) - Azalea.screenMargin)/(float)gridHeight;
-			cardScaler = (Gdx.graphics.getHeight()-Azalea.showMargin)/cardSize;
+			cardSize = (Gdx.graphics.getHeight()-(gridHeight*Statics.cardMargin) - Statics.screenMargin)/(float)gridHeight;
+			cardScaler = (Gdx.graphics.getHeight()-Statics.showMargin)/cardSize;
 		}
 
-		float xShift = (gridWidth-1)*(cardSize + Azalea.cardMargin)*0.5f;
-		float yShift = (gridHeight-1)*(cardSize + Azalea.cardMargin)*0.5f;
+		float xShift = (gridWidth-1)*(cardSize + Statics.cardMargin)*0.5f;
+		float yShift = (gridHeight-1)*(cardSize + Statics.cardMargin)*0.5f;
 
 		//Make positions
 		Array<Vector2> positions = new Array<Vector2>();		
 		for(int i=0; i < n; i++){
-			positions.add(new Vector2((i%gridWidth)*(cardSize + Azalea.cardMargin)-xShift,(i/gridWidth)*(cardSize + Azalea.cardMargin)-yShift));
+			positions.add(new Vector2((i%gridWidth)*(cardSize + Statics.cardMargin)-xShift,(i/gridWidth)*(cardSize + Statics.cardMargin)-yShift));
 		}
 
 		//Shuffle positions
@@ -141,54 +163,75 @@ public class GameScreen extends Screen {
 
 			//assign positions per card
 			for(int i=0; i < numCardsInGroup; i++){
-				cardsInPlay.add(new Card(groupID, d.cardTexture, positions.pop()));
+				cardsInPlay.add(new Card(groupID, d.getCardTexture(), positions.pop()));
 			}
 
 			groupID++;
-		}	
+		}
 		
-		//Other gui stuff here
-		darkenDecal.setBlending(GL20.GL_DST_COLOR, GL20.GL_ONE_MINUS_SRC_ALPHA); //Blending "multiply"
-		darkenDecal.setPosition(0, 0, 1);
-		prizeDecal.setPosition(0, 0, 100);
+		this.ready = true;
 		
 	}
 
 	@Override
-	public void render(SpriteBatch sp, DecalBatch db) {		
-		sp.draw(Statics.PLAYGROUND_BACKGROUND, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
+	public void init(){
+		Gdx.input.setInputProcessor(this);
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+		Gdx.gl.glCullFace(GL20.GL_BACK);
+		Gdx.gl20.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		Gdx.gl20.glEnable(GL20.GL_BLEND);
+	}
+	
+	@Override
+	public void render() {
+		
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
+		spriteBatch.begin();
+		spriteBatch.draw(Statics.PLAYGROUND_BACKGROUND, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		spriteBatch.end();
+		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
+		
 		//if transitioning
 		if(transition > 0){
-			transition -= Gdx.graphics.getDeltaTime()*0.8f;
+			transition -= Gdx.graphics.getDeltaTime()*0.5f;
 		} else {
 			transition = 0;
 		}
 		
 		for(Card c : cardsInPlay){
-			c.render(db);
+			c.render(decalBatch);
 		}
 
 		Color cf = darkenDecal.getColor();
 		
 		switch (currentState) {
 			case show_success: //Set prize image as the target and show it
-				if(transition > 0){			
+				if(transition > 0){
+					for(Card c : openedCards){
+						c.zoom_amount *= transition;
+					}
 					cf.a = 1-transition;
+					Color cp = prizeDecal.getColor();
+					cp.a = (float) Math.pow(1-transition, 2);
 					darkenDecal.setColor(cf);
+					prizeDecal.setColor(cp);
 				}
-				db.add(darkenDecal);
-				db.add(prizeDecal);
+				decalBatch.add(darkenDecal);
+				decalBatch.add(prizeDecal);
 				break;
 			case hide:
 				if(transition > 0){			
 					cf.a = transition;
 					darkenDecal.setColor(cf);
-					db.add(darkenDecal);
+					decalBatch.add(darkenDecal);
 					if(lastState == GameStates.show_success){
 						prizeDecal.setScale(transition);
-						db.add(prizeDecal);
+						prizeDecal.setColor(cf);
+						decalBatch.add(prizeDecal);
 					}
+					transition -= Gdx.graphics.getDeltaTime();
 				}
 				break;
 				
@@ -197,7 +240,7 @@ public class GameScreen extends Screen {
 					cf.a = (1-transition);
 					darkenDecal.setColor(cf);
 				}
-				db.add(darkenDecal);
+				decalBatch.add(darkenDecal);
 				if(openedCards.get(0).position.x > openedCards.get(1).position.x){
 					openedCards.get(0).lerpTowards(screenShowPosition_R);
 					openedCards.get(1).lerpTowards(screenShowPosition_L);
@@ -215,13 +258,23 @@ public class GameScreen extends Screen {
 
 		}
 		
+		decalBatch.flush();
+		
 	}
-
+	
 	@Override
 	public void resize(int width, int height) {
-		screenShowPosition_L = new Vector3(-width*0.25f, 0, 100);
-		screenShowPosition_R = new Vector3(width*0.25f, 0, 100);
-		darkenDecal.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		screenShowPosition_L = new Vector3(-width*0.25f, 0, 80);
+		screenShowPosition_R = new Vector3(width*0.25f, 0, 80);
+		
+		camera.updateViewport();
+		camera.near = 0.01f;
+		camera.far = 300f;
+		camera.direction.set(0, 0, -1);
+		camera.position.set(0, 0, camera.far*0.5f);
+		camera.update();
+		
+		darkenDecal.setDimensions(width, height);
 	}
 
 	@Override
@@ -243,20 +296,19 @@ public class GameScreen extends Screen {
 	}
 
 	@Override
-	public boolean done() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-
-	@Override
-	public void handleTouchPoint(float x, float y, int id) {
-
+	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		Vector3 tp3 = new Vector3(screenX, screenY, 1);
+		camera.unproject(tp3);
+			
 		if(transition > 0){
 			transition = 0; 
 		}
 
 		switch (currentState) {
+			case end:
+				Azalea.changeState(AppState.menu);
+				break;
+				
 			case show_success:
 				cardsInPlay.removeAll(openedCards, true);
 				openedCards.clear();
@@ -275,12 +327,12 @@ public class GameScreen extends Screen {
 					c.resetPosition(); //Make sure all cards return to origin
 				}
 				openedCards.clear();
-				swapState(GameStates.pick);
+				if(cardsInPlay.size > 0) swapState(GameStates.pick); else swapState(GameStates.end);
 				//break; //No break here to go directly to pick (special case because we need to reset only after transitioning)
 				
 			case pick:
 				for(Card c : cardsInPlay){
-					if(c.opened == false && c.isHit(x, y)){
+					if(c.opened == false && c.isHit(tp3.x, tp3.y)){
 						c.setOpen(true);
 						openedCards.add(c);
 					}
@@ -303,7 +355,7 @@ public class GameScreen extends Screen {
 						//TODO: get prize scaling from previous code
 						float pWidth = tr.getRegionWidth();
 						float pHeight = tr.getRegionHeight();
-						float s = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) - Azalea.screenMargin*0.5f;
+						float s = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) - Statics.screenMargin*0.5f;
 						if(pWidth > pHeight){
 							prizeDecal.setWidth(s);
 							prizeDecal.setHeight(s*(pHeight/pWidth));
@@ -321,12 +373,66 @@ public class GameScreen extends Screen {
 			default:
 				break;
 		}
+		
+		return false;
+
+	}
+	
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		//Vector3 tp3 = new Vector3(screenX, screenY, 1);
+		//camera.unproject(tp3);
+		//if(currentScreen != null) currentScreen.touchUp(tp3.x, tp3.y, pointer);
+		return false;
 	}
 
-	private void swapState(GameStates newState) {
-		lastState = currentState;
-		currentState = newState;
-		transition = 1;
+	@Override
+	public boolean keyDown(int keycode) {
+		// TODO Auto-generated method stub
+		return false;
 	}
+
+	@Override
+	public boolean keyUp(int keycode) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean keyTyped(char character) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean touchDragged(int screenX, int screenY, int pointer) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean mouseMoved(int screenX, int screenY) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean scrolled(int amount) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void touchDown(float x, float y, int id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void touchUp(float x, float y, int id) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

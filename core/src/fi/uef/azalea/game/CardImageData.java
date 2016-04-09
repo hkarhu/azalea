@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
 import fi.uef.azalea.Statics;
 
@@ -16,11 +18,21 @@ public class CardImageData {
 	public static final int PIXMAP_SIZE = 512;
 	
 	public final FileHandle sourceFile;
-	public final TextureRegion cardTexture;
+	private TextureRegion cardTexture;
 	
 	public CardImageData(FileHandle sourceFile) {
 		this.sourceFile = sourceFile;
+	}
+	
+	public TextureRegion getCardTexture(){
+		if(cardTexture == null){
+			generateCardTexture();
+		}
 		
+		return cardTexture;
+	}
+	
+	public void generateCardTexture(){
 		Pixmap.setBlending(Blending.None);
 		Pixmap texture = new Pixmap(sourceFile);
 		Pixmap cardbase = new Pixmap(PIXMAP_SIZE, PIXMAP_SIZE, Format.RGBA4444); //TODO: check performance with 8888
@@ -40,5 +52,5 @@ public class CardImageData {
 		TextureRegion original = new TextureRegion(new Texture(sourceFile));
 		return original;
 	}
-
+	
 }

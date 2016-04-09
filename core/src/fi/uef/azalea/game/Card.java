@@ -52,6 +52,7 @@ public class Card {
 	}
 		
 	public void render(DecalBatch batch){
+		
 		//Flip animations
 		if(opened){
 			if(flip_rotation < 1){
@@ -72,8 +73,8 @@ public class Card {
 		//if not open, bounce back to origin
 		if(!opened){
 			if(!cardFrontDecal.getPosition().idt(position)){
-				cardFrontDecal.getPosition().interpolate(position, 3*Gdx.graphics.getDeltaTime(), Interpolation.exp5Out);
-				cardFrontDecal.setZ(position.z + GameScreen.cardSize); //Force card to be above all others until returned to grid
+				cardFrontDecal.getPosition().interpolate(position, Gdx.graphics.getDeltaTime(), Interpolation.exp5Out);
+				cardFrontDecal.setZ(position.z + GameScreen.cardSize*0.5f); //Force card to be above all others until returned to grid
 				cardBackDecal.setPosition(cardFrontDecal.getPosition());
 			}
 			if(zoom_amount > 0){
@@ -97,6 +98,7 @@ public class Card {
 	}
 
 	public boolean isHit(float x, float y){
+		System.out.println("asdasd");
 		return dimensions.contains(x, y);
 	}
 

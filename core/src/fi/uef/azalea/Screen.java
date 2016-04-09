@@ -1,18 +1,28 @@
 package fi.uef.azalea;
 
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
-
 public abstract class Screen {
 
-	public abstract void render(SpriteBatch spriteBatch, DecalBatch decalBatch);
-	public abstract void resize(int width, int height);
-	public abstract void dispose();
+	protected Screen nextScreen;
+	public boolean ready = false;
+	
+	public Screen getNextScreen(){
+		return nextScreen;
+	}
+	
+	public abstract void init(); //Init gets called every time screen is changed
+	
+	public abstract void render(); //Render loop calls this
+	
+	public abstract void resize(int width, int height); //Called when resizing the canvas is over
+	
+	public abstract void dispose(); //Called when program gets derezzed
+	
+	//These are used when app gets switched
 	public abstract void pause();
 	public abstract void resume();
-	public abstract void handleTouchPoint(float x, float y, int id);
-	public abstract boolean done();
+	
+	//Input handling abstraction
+	public abstract void touchDown(float x, float y, int id);
+	public abstract void touchUp(float x, float y, int id);
 	
 }
