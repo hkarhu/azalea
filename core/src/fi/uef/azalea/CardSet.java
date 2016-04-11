@@ -56,7 +56,7 @@ public class CardSet extends Table {
 			coverTextureBack = generateBackgroundTexture(backFile);
 		}
 		
-		TextButton selectButton = new TextButton("SELECT", Statics.SKIN); //TODO
+		final TextButton selectButton = new TextButton("SELECT", Statics.SKIN); //TODO
 		selectButton.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {

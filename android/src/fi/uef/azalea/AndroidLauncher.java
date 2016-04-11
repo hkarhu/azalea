@@ -4,6 +4,7 @@ import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 
 import android.os.Bundle;
+import android.os.Environment;
 
 public class AndroidLauncher extends AndroidApplication {
 	@Override
@@ -14,6 +15,9 @@ public class AndroidLauncher extends AndroidApplication {
 		//config.vSyncEnabled = true;
 		//config.title = Azalea.TITLE;
 		//config.addIcon("icon.png", FileType.Internal);
-		initialize(new Azalea(), config);
+		Azalea a = new Azalea();
+		a.addFileSources(Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/");
+		initialize(a, config);
 	}
+
 }

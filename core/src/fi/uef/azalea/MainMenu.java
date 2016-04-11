@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -21,7 +22,7 @@ public class MainMenu extends Screen {
 	public MainMenu() {
 
 		stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-		
+		Image background = new Image(Statics.MENU);
 		Table t = new Table(Statics.SKIN);
 		start = new TextButton("Pelaa muistipeliae", Statics.SKIN);
 		start.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.1f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
@@ -29,6 +30,7 @@ public class MainMenu extends Screen {
 		edit.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.22f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
 		t.addActor(start);
 		t.addActor(edit);
+		stage.addActor(background);
 		stage.addActor(t);
         
 		start.addListener(new ChangeListener() {
@@ -43,6 +45,11 @@ public class MainMenu extends Screen {
 	@Override
 	public void init() {
 		Gdx.input.setInputProcessor(stage);
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glEnable(GL20.GL_DEPTH_TEST);
+		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
+		Gdx.gl20.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+		Gdx.gl20.glEnable(GL20.GL_BLEND);
 		ready = true;
 	}
 

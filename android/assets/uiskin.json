@@ -48,8 +48,8 @@ com.badlogic.gdx.scenes.scene2d.ui.Touchpad$TouchpadStyle: {
 	default: { background: default-pane, knob: default-round-large }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
-	default: { up: default-round-large, down: default-round-down },
-	toggle: { up: default-round, down: default-round-down, checked: default-round-down }
+	default: { up: button_base, down: button_base_invert },
+	toggle: { up: button_base, down: button_base_invert, checked: button_base_invert }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
 	default: {
@@ -127,8 +127,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle: {
 	default: { plus: tree-plus, minus: tree-minus, selection: default-select-selection }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
-	default-vertical: { background: default-slider, knob: default-slider-knob },
-	default-horizontal: { background: default-slider, knob: default-slider-knob }
+	default-horizontal: { background: default-slider, knob: slider }
 },
 com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle: {
 	default: {

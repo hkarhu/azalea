@@ -60,7 +60,9 @@ public class Card {
 			} else flip_rotation = 1;
 		} else {
 			if(flip_rotation > 0){
-				flip_rotation -= Gdx.graphics.getDeltaTime();
+				if(zoom_amount < 0.1f){
+					flip_rotation -= Gdx.graphics.getDeltaTime();
+				}
 			} else flip_rotation = 0;
 		}
 		float r = (float) (Math.sin(flip_rotation*Math.PI*0.5)*180);
@@ -73,8 +75,8 @@ public class Card {
 		//if not open, bounce back to origin
 		if(!opened){
 			if(!cardFrontDecal.getPosition().idt(position)){
-				cardFrontDecal.getPosition().interpolate(position, Gdx.graphics.getDeltaTime(), Interpolation.exp5Out);
-				cardFrontDecal.setZ(position.z + GameScreen.cardSize*0.5f); //Force card to be above all others until returned to grid
+				cardFrontDecal.getPosition().interpolate(position, 5*Gdx.graphics.getDeltaTime(), Interpolation.sineOut);
+				cardFrontDecal.setZ(position.z + GameScreen.cardSize); //Force card to be above all others until returned to grid
 				cardBackDecal.setPosition(cardFrontDecal.getPosition());
 			}
 			if(zoom_amount > 0){
@@ -98,7 +100,6 @@ public class Card {
 	}
 
 	public boolean isHit(float x, float y){
-		System.out.println("asdasd");
 		return dimensions.contains(x, y);
 	}
 
@@ -107,6 +108,7 @@ public class Card {
 	}
 
 	public void resetPosition() {
+		flip_rotation = 0;
 		zoom_amount = 0;
 		cardFrontDecal.setPosition(position);
 		cardBackDecal.setPosition(position);

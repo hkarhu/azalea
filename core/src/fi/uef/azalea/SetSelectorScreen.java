@@ -5,7 +5,6 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
@@ -13,11 +12,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.sun.xml.internal.ws.api.Cancelable;
 
 import fi.uef.azalea.Azalea.AppState;
 import fi.uef.azalea.game.CardImageData;
@@ -53,9 +50,8 @@ public class SetSelectorScreen extends Screen {
 		//cardSetScrollPane.setupFadeScrollBars(1, 1);
 		cardSetScrollPane.setFadeScrollBars(false);
 
-		Dialog cardAmountDialog = new Dialog("SELECT_AMOUNT", Statics.SKIN);
+		final Dialog cardAmountDialog = new Dialog("SELECT_AMOUNT", Statics.SKIN);
 		
-		cardAmountDialog.setSize(Gdx.graphics.getWidth()*0.6f, Gdx.graphics.getHeight()*0.6f);
 		TextButton dialogOK = new TextButton("OK", Statics.SKIN);
 		dialogOK.setSize(100, 70);
 		dialogOK.addListener(new ChangeListener(){
@@ -78,9 +74,9 @@ public class SetSelectorScreen extends Screen {
 
 		cardAmountDialog.button(dialogCancel);
 		cardAmountDialog.button(dialogOK);
-		cardAmountDialog.show(stage);
 		
-		TextButton doneButton = new TextButton("PLAY", Statics.SKIN); //TODO
+		
+		final TextButton doneButton = new TextButton("PLAY", Statics.SKIN); //TODO
 		doneButton.setDisabled(true);
 		doneButton.setVisible(false);
 		doneButton.addListener(new ChangeListener(){
@@ -91,15 +87,20 @@ public class SetSelectorScreen extends Screen {
 				for(CardSet s : selectedSets){
 					maxNumCards += s.getNumCards();
 				}
-				Slider amountSlider = new Slider(2, maxNumCards, 1, false, Statics.SKIN);
+				final Slider amountSlider = new Slider(2, maxNumCards, 1, false, Statics.SKIN);
+				final Label amountLabel = new Label("Kortteja: " + cardAmount, Statics.SKIN); //TODO
 				amountSlider.setSize(400, 100);
 				amountSlider.addListener(new ChangeListener() {
 					@Override
 					public void changed(ChangeEvent event, Actor actor) {
 						cardAmount = (int) amountSlider.getValue();
+						amountLabel.setText("Kortteja: " + cardAmount); //TODO
 					}
 				});
-				cardAmountDialog.add(amountSlider).expandX();
+				cardAmountDialog.getContentTable().add(amountLabel).expandX();
+				cardAmountDialog.getContentTable().row();
+				cardAmountDialog.getContentTable().add(amountSlider).size(400, 80).expandX();
+				cardAmountDialog.setBounds(0, 0, Gdx.graphics.getWidth()*0.6f, Gdx.graphics.getHeight()*0.6f);
 				cardAmountDialog.show(stage);
 			}
 		});
@@ -112,7 +113,7 @@ public class SetSelectorScreen extends Screen {
 			}
 		});
 		
-		for(CardSet s : cardSets){
+		for(final CardSet s : cardSets){
 			s.addListener(new ChangeListener() {
 				@Override
 				public void changed(ChangeEvent event, Actor actor) {					
@@ -150,23 +151,27 @@ public class SetSelectorScreen extends Screen {
 	
 	private void reloadCardSets() {
 		cardSets.clear();
-		FileHandle[] files = Gdx.files.local("cards/").list();
-		for(FileHandle file: files) {
-			if(file.isDirectory()){
-				cardSets.add(new CardSet(file));
+		for(String path : Azalea.getFileSources()){
+			FileHandle[] files = Gdx.files.local(path).list();
+			if(files.length > 0)
+			for(FileHandle file: files) {
+				if(file.isDirectory()){
+					cardSets.add(new CardSet(file));
+				}
 			}
 		}
 	}
 
 	public Array<CardImageData> getCards() {
-		/*
+		
 		Array<CardImageData> cards = new Array<CardImageData>();
 		int n = cardAmount/selectedSets.size;
 		for(CardSet s : selectedSets){
 			cards.addAll(s.getRandomCards(n));
 		}
-		*/
-		return selectedSets.get(0).getRandomCards(10);
+		return cards; 
+		
+		//return selectedSets.get(0).getRandomCards(10);
 	}
 	
 	@Override

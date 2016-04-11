@@ -4,13 +4,9 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Select;
-import com.sun.org.apache.bcel.internal.generic.LoadClass;
 
-import fi.uef.azalea.game.CardImageData;
 import fi.uef.azalea.game.GameScreen;
 
 public class Azalea extends ApplicationAdapter implements ApplicationListener {
@@ -27,8 +23,10 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	private SpriteBatch spriteBatch;
 	private static float load_transition = 1;
 	
-	public Azalea() {
-		
+	private static Array<String> fileSources = new Array<String>();
+	
+	public void addFileSources(String f) {
+		fileSources.add(f);
 	}
 
 	@Override
@@ -42,7 +40,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 		setSelector = new SetSelectorScreen();
 		gameScreen = new GameScreen();
 
-		changeState(AppState.select);
+		changeState(AppState.menu);
 
 	}
 	
@@ -90,6 +88,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 		currentScreen.init();
 		currentScreen.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		currentState = newState;
+		System.out.println("State: " + currentState);
 	}
 	
 	@Override
@@ -100,9 +99,10 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	
 	@Override
 	public void dispose() {
-		super.dispose();
 		mainMenu.dispose();
 		gameScreen.dispose();
+		setSelector.dispose();
+		super.dispose();
 	}
 	
 	@Override
@@ -115,6 +115,10 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	public void resume() {
 		super.resume();
 		if(currentScreen != null) currentScreen.resume();
+	}
+
+	public static Array<String> getFileSources() {
+		return fileSources;
 	}
 	
 }

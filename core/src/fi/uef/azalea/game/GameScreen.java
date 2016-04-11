@@ -27,7 +27,6 @@ import fi.uef.azalea.camera.ResizeableOrthographicCamera;
 public class GameScreen extends Screen implements InputProcessor {
 
 	public static float cardSize = 0f;
-	private static float cardScaler = 1f;
 	
 	private int guesses = 0;
 	private int max_tries = 0;
@@ -41,6 +40,8 @@ public class GameScreen extends Screen implements InputProcessor {
 	
 	private Decal darkenDecal;
 	private Decal prizeDecal;
+	private Decal correctDecal;
+	private Decal wrongDecal;
 
 	//Game states and animations
 	private enum GameStates { pick, show_wrong, show_success, hide, end }
@@ -53,19 +54,25 @@ public class GameScreen extends Screen implements InputProcessor {
 	private ResizeableOrthographicCamera camera;
 	
 	public GameScreen() {
+		cardsInPlay = new Array<Card>();
+		openedCards = new Array<Card>();
+		cardImages = new HashMap<Integer, CardImageData>();
 		camera = new ResizeableOrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		
 		decalBatch = new DecalBatch(new CameraGroupStrategy(camera));
 		spriteBatch = new SpriteBatch();
 		
 		//Other gui stuff
+		wrongDecal = Decal.newDecal(new TextureRegion(Statics.WRONG), true);
+		correctDecal = Decal.newDecal(new TextureRegion(Statics.CORRECT), true);
+		
 		TextureRegion darken = new TextureRegion(Statics.DARKEN_MASK);
-		darkenDecal = Decal.newDecal(darken, true);
 		prizeDecal = Decal.newDecal(darken, true);
+		prizeDecal.setPosition(0, 0, 100);
+		darkenDecal = Decal.newDecal(darken, true);
 		darkenDecal.setBlending(GL20.GL_DST_COLOR, GL20.GL_ONE_MINUS_SRC_ALPHA); //Blending "multiply"
 		darkenDecal.setPosition(0, 0, 1);
-		darkenDecal.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-		prizeDecal.setPosition(0, 0, 100);
+		darkenDecal.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
 	}
 	
 	private void swapState(GameStates newState) {
@@ -75,12 +82,12 @@ public class GameScreen extends Screen implements InputProcessor {
 	}
 
 	public void setBoard(Array<CardImageData> inputData, int numCardsInGroup){
-		
+		currentState = GameStates.pick;
 		max_tries = numCardsInGroup;
 		guesses = 0;
-		cardsInPlay = new Array<Card>();
-		openedCards = new Array<Card>();
-		cardImages = new HashMap<Integer, CardImageData>();
+		cardsInPlay.clear();
+		openedCards.clear();
+		cardImages.clear();
 
 		int n = inputData.size*numCardsInGroup;
 		System.out.println("Will use " + n + " cards.");
@@ -135,21 +142,50 @@ public class GameScreen extends Screen implements InputProcessor {
 
 		System.out.println("Using " + gridWidth + "x" + gridHeight + " board.");
 		
-		if(Gdx.graphics.getHeight() > Gdx.graphics.getWidth()){
+		System.out.println("Board ratio: " + gridWidth/(float)gridHeight);
+		
+		boolean fixBoard = false;
+		int gridWidthF = 0;
+		if(gridWidth/(float)gridHeight > 3){
+			fixBoard = true;
+			int shiftCards = ((gridWidth*gridHeight)/4)*2;
+			gridWidthF = gridWidth/2+1;
+			System.out.println("Board shape is crap. Applying hack. Shifting " + shiftCards + " cards, with " + gridWidthF );
+		}
+		
+		if(fixBoard){
+			gridHeight = gridHeight*2;
+			gridWidth = gridWidthF;
+		}
+		if(Gdx.graphics.getHeight()/gridHeight > Gdx.graphics.getWidth()/gridWidth){
 			cardSize = (Gdx.graphics.getWidth()-(gridWidth*Statics.cardMargin) - Statics.screenMargin)/(float)gridWidth;
-			cardScaler = (Gdx.graphics.getWidth()-Statics.showMargin)/cardSize;
 		} else {
 			cardSize = (Gdx.graphics.getHeight()-(gridHeight*Statics.cardMargin) - Statics.screenMargin)/(float)gridHeight;
-			cardScaler = (Gdx.graphics.getHeight()-Statics.showMargin)/cardSize;
 		}
 
 		float xShift = (gridWidth-1)*(cardSize + Statics.cardMargin)*0.5f;
 		float yShift = (gridHeight-1)*(cardSize + Statics.cardMargin)*0.5f;
 
 		//Make positions
-		Array<Vector2> positions = new Array<Vector2>();		
-		for(int i=0; i < n; i++){
-			positions.add(new Vector2((i%gridWidth)*(cardSize + Statics.cardMargin)-xShift,(i/gridWidth)*(cardSize + Statics.cardMargin)-yShift));
+		Array<Vector2> positions = new Array<Vector2>();
+		if(fixBoard){
+			for(int i=0; i < n; i++){
+				if((i/gridWidthF)%2 != 0){
+					positions.add(new Vector2((i%gridWidthF)*(cardSize + Statics.cardMargin)-xShift,(i/gridWidthF)*(cardSize + Statics.cardMargin)-yShift));
+				} else {
+					if((i%gridWidthF) == 0){
+						n++;
+						continue;
+					}
+
+					positions.add(new Vector2((i%gridWidthF-0.5f)*(cardSize + Statics.cardMargin)-xShift,(i/gridWidthF)*(cardSize + Statics.cardMargin)-yShift));
+					
+				}
+			}
+		} else {
+			for(int i=0; i < n; i++){
+				positions.add(new Vector2((i%gridWidth)*(cardSize + Statics.cardMargin)-xShift,(i/gridWidth)*(cardSize + Statics.cardMargin)-yShift));
+			}
 		}
 
 		//Shuffle positions
@@ -189,7 +225,7 @@ public class GameScreen extends Screen implements InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
 		spriteBatch.begin();
-		spriteBatch.draw(Statics.PLAYGROUND_BACKGROUND, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		spriteBatch.draw(Statics.PLAYGROUND_BACKGROUND, 0, 0, 1280, 800);
 		spriteBatch.end();
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		
@@ -241,6 +277,9 @@ public class GameScreen extends Screen implements InputProcessor {
 					darkenDecal.setColor(cf);
 				}
 				decalBatch.add(darkenDecal);
+				wrongDecal.setPosition(0, 0, cardSize*2);
+				wrongDecal.setScale(0.2f+(2+(float)Math.sin(Gdx.graphics.getFrameId()*0.1f))*0.1f);
+				decalBatch.add(wrongDecal);
 				if(openedCards.get(0).position.x > openedCards.get(1).position.x){
 					openedCards.get(0).lerpTowards(screenShowPosition_R);
 					openedCards.get(1).lerpTowards(screenShowPosition_L);
@@ -249,8 +288,8 @@ public class GameScreen extends Screen implements InputProcessor {
 					openedCards.get(0).lerpTowards(screenShowPosition_L);
 				}
 				
-				openedCards.get(1).zoom_amount = (1-transition)*cardScaler;
-				openedCards.get(0).zoom_amount = (1-transition)*cardScaler;
+				openedCards.get(1).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler;
+				openedCards.get(0).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler;
 				break;
 				
 			default:
@@ -264,17 +303,20 @@ public class GameScreen extends Screen implements InputProcessor {
 	
 	@Override
 	public void resize(int width, int height) {
-		screenShowPosition_L = new Vector3(-width*0.25f, 0, 80);
-		screenShowPosition_R = new Vector3(width*0.25f, 0, 80);
-		
+	
 		camera.updateViewport();
 		camera.near = 0.01f;
-		camera.far = 300f;
+		camera.far = 1000f;
 		camera.direction.set(0, 0, -1);
-		camera.position.set(0, 0, camera.far*0.5f);
+		camera.position.set(0, 0, camera.far*0.75f);
 		camera.update();
 		
-		darkenDecal.setDimensions(width, height);
+		screenShowPosition_L = new Vector3(-Statics.cardScaler, 0, cardSize*2);
+		screenShowPosition_R = new Vector3(Statics.cardScaler, 0, cardSize*2);
+		
+		int s = Math.max(width, height);
+		darkenDecal.setDimensions(s, s);
+		
 	}
 
 	@Override
