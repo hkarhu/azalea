@@ -391,7 +391,7 @@ public class GameScreen extends Screen implements InputProcessor {
 					}
 					if(allSame){
 						CardImageData d = cardImages.get(lastCard.getGroup());
-						TextureRegion tr = d.getOriginalImage();
+						TextureRegion tr = d.getFullImageTexture();
 						prizeDecal.setTextureRegion(tr);
 						prizeDecal.setScale(1);
 						//TODO: get prize scaling from previous code

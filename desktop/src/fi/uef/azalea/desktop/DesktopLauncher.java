@@ -1,7 +1,6 @@
 package fi.uef.azalea.desktop;
 
 import com.badlogic.gdx.Files.FileType;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
@@ -17,8 +16,8 @@ public class DesktopLauncher {
 		config.width = Statics.DEFAULT_WIDTH;
 		config.height = Statics.DEFAULT_HEIGHT;
 		config.addIcon("icon.png", FileType.Internal);
-		Azalea a = new Azalea();
-		a.addFileSources("cards/");
+
+		Azalea a = new Azalea(new DesktopPlatformBridge());
 		new LwjglApplication(a, config);
 	}
 }

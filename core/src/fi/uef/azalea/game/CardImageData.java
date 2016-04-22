@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -14,24 +15,36 @@ import fi.uef.azalea.Statics;
 
 public class CardImageData {
 	
-	
-	public static final int PIXMAP_SIZE = 512;
-	
-	public final FileHandle sourceFile;
+	public FileHandle sourceFile;
+	private TextureAtlas cardAtlas;
 	private TextureRegion cardTexture;
-	
-	public CardImageData(FileHandle sourceFile) {
+
+	public void setSource(FileHandle sourceFile){
 		this.sourceFile = sourceFile;
 	}
 	
 	public TextureRegion getCardTexture(){
-		if(cardTexture == null){
-			generateCardTexture();
-		}
-		
 		return cardTexture;
 	}
 	
+	public void setCardTexture(TextureRegion cardTexture){
+		
+	}
+	
+	public TextureRegion getFullImageTexture(){
+		TextureRegion original = new TextureRegion(new Texture(sourceFile));
+		return original;
+	}
+	
+	public FileHandle getSourceFile(){
+		return sourceFile;
+	}
+
+	public void setTextureAtlas(TextureAtlas cardAtlas) {
+		this.cardAtlas = cardAtlas;
+	}
+	
+	/*
 	public void generateCardTexture(){
 		Pixmap.setBlending(Blending.None);
 		Pixmap texture = new Pixmap(sourceFile);
@@ -47,10 +60,6 @@ public class CardImageData {
 		
 		this.cardTexture = new TextureRegion(tex);
 	}
-	
-	public TextureRegion getOriginalImage(){
-		TextureRegion original = new TextureRegion(new Texture(sourceFile));
-		return original;
-	}
+	*/
 	
 }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -16,45 +17,31 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.Json.Serializable;
-import com.badlogic.gdx.utils.JsonValue;
 
 import fi.uef.azalea.game.CardImageData;
 
 public class CardSet extends Table {
 	
-	private String title = "default title";
-	private Drawable coverTextureBack;
-	private Drawable coverTextureTitle;
+	private final FileHandle datafile;
 	
+	private String title = "Uusi korttisarja"; //TODO
+	private TextureAtlas cardAtlas;
 	private Array<CardImageData> cards;
+	
+	private Label cardAmountLabel;
+	private Texture labelTextureBack;
+	private Texture labelTexture;
+	private Drawable labelDrawableBack;
+	private Drawable labelDrawable;
 	
 	private boolean selected = false;
 		
-	public CardSet(FileHandle targetFolder) {
+	public CardSet(FileHandle datafile) {
 		
-		FileHandle[] files = targetFolder.list();
+		this.datafile = datafile;
+		
+		cardAtlas = new TextureAtlas();
 		cards = new Array<CardImageData>();
-		
-		for(FileHandle file: files) {
-			cards.add(new CardImageData(file));
-		}
-		
-		title = targetFolder.name();
-		
-		FileHandle labelFile = targetFolder.parent().child(title+"_label.png");
-		FileHandle backFile = targetFolder.parent().child(title+"_back.png");
-		
-		if(labelFile.exists()){
-			coverTextureTitle = new TextureRegionDrawable(new TextureRegion(new Texture(labelFile)));
-		}
-		
-		if(backFile.exists()){
-			coverTextureBack = new TextureRegionDrawable(new TextureRegion(new Texture(backFile)));
-		} else {
-			coverTextureBack = generateBackgroundTexture(backFile);
-		}
 		
 		final TextButton selectButton = new TextButton("SELECT", Statics.SKIN); //TODO
 		selectButton.addListener(new ChangeListener() {
@@ -65,10 +52,69 @@ public class CardSet extends Table {
 			}
 		});
 		
-		this.add(selectButton).pad(8).size(100, 100).align(Align.left);
-		if(coverTextureTitle == null) this.add(new Label(title, Statics.SKIN)).align(Align.left).fill().pad(20); //TODO
-		this.add(new Label(cards.size + " CARDS", Statics.SKIN)).align(Align.bottomRight).padRight(30).padBottom(20).expandX(); //TODO
+		cardAmountLabel = new Label(cards.size + " CARDS", Statics.SKIN);
 		
+		this.add(selectButton).pad(8).size(150, 100).align(Align.left);
+		this.add(new Label(title, Statics.SKIN)).align(Align.left).expand().fill(); //TODO
+		this.add(cardAmountLabel).align(Align.bottomRight).padRight(30).padBottom(20).expandX(); //TODO		
+		
+		/*
+		FileHandle[] files = targetFolder.list();
+		cards = new Array<CardImageData>();
+		for(FileHandle file: files) {
+			cards.add(new CardImageData(file));
+		}
+		FileHandle labelFile = targetFolder.parent().child(title+"_label.png");
+		FileHandle backFile = targetFolder.parent().child(title+"_back.png");
+		
+		if(labelFile.exists()){
+			coverTextureTitle = new TextureRegionDrawable(new TextureRegion(new Texture(labelFile)));
+		} else {
+			coverTextureTitle = generateLabelTexture(title);
+		}
+		
+		if(backFile.exists()){
+			coverTextureBack = new TextureRegionDrawable(new TextureRegion(new Texture(backFile)));
+		} else {
+			coverTextureBack = generateBackgroundTexture(backFile);
+		}
+		*/
+
+		
+	}
+	
+	public void setLabelTexture(Pixmap newLabel){
+		Pixmap.setBlending(Blending.None);
+		
+		Pixmap p = new Pixmap(512, 128, Format.RGBA8888);
+		p.setColor(0,0,0,0);
+		p.fill();
+		p.setColor(1,1,1,0);
+		p.drawRectangle(1,1,511,127);
+		p.drawPixmap(newLabel, 0,0, newLabel.getWidth(), newLabel.getHeight(), 2, 2, 510, 126);
+		labelTexture = new Texture(p);
+		p.dispose();
+		
+		TextureRegion region = new TextureRegion(labelTexture);
+		
+		labelDrawable = new TextureRegionDrawable(region);
+	}
+
+	private Drawable generateLabelTexture(String title){
+		Pixmap.setBlending(Blending.None);
+		Pixmap p = new Pixmap(1024, 128, Format.RGBA8888);
+		p.setColor(0,0,0,0);
+		p.fill();
+		p.setColor(1,1,1,0);
+		p.drawRectangle(2,2,1022,126);
+
+		Texture t = new Texture(p);
+		p.dispose();
+
+		TextureRegion region = new TextureRegion(t);
+
+		Drawable d = new TextureRegionDrawable(region);
+		return d;
 	}
 	
 	private Drawable generateBackgroundTexture(FileHandle backFile) {
@@ -115,6 +161,10 @@ public class CardSet extends Table {
 		return d;
 	}
 
+	public Array<CardImageData> getCards(){
+		return cards;
+	}
+	
 	public Array<CardImageData> getRandomCards(int num){
 		Array<CardImageData> out = new Array<CardImageData>();
 		cards.shuffle();
@@ -136,19 +186,19 @@ public class CardSet extends Table {
 	protected void drawBackground (Batch batch, float parentAlpha, float x, float y) {
 		
 		if(selected) batch.setColor(1,1,1,1); else batch.setColor(0.5f,0.5f,0.5f,1);
-		if(coverTextureBack != null) coverTextureBack.draw(batch, x, y, getWidth(), getHeight());
+		if(labelDrawableBack != null) labelDrawableBack.draw(batch, x, y, getWidth(), getHeight());
 		
 		//Label
-		if(coverTextureTitle != null){
-			float sizeScaler = 0.8f/(coverTextureTitle.getMinHeight()/getHeight());
+		if(labelDrawable != null){
+			float sizeScaler = 0.8f/(labelDrawable.getMinHeight()/getHeight());
 			float shadowShift = 8;
-			float yShift = (getHeight()-(coverTextureTitle.getMinHeight()*sizeScaler))*0.5f;
+			float yShift = (getHeight()-(labelDrawable.getMinHeight()*sizeScaler))*0.5f;
 			float xShift = 200;
 			
 			batch.setColor(0,0,0,0.8f);
-			coverTextureTitle.draw(batch, x+xShift+shadowShift, y+yShift-shadowShift, coverTextureTitle.getMinWidth()*sizeScaler, coverTextureTitle.getMinHeight()*sizeScaler);
+			labelDrawable.draw(batch, x+xShift+shadowShift, y+yShift-shadowShift, labelDrawable.getMinWidth()*sizeScaler, labelDrawable.getMinHeight()*sizeScaler);
 			batch.setColor(1,1,1,1);
-			coverTextureTitle.draw(batch, x+xShift, y+yShift, coverTextureTitle.getMinWidth()*sizeScaler, coverTextureTitle.getMinHeight()*sizeScaler);
+			labelDrawable.draw(batch, x+xShift, y+yShift, labelDrawable.getMinWidth()*sizeScaler, labelDrawable.getMinHeight()*sizeScaler);
 		}
 		
 	}
@@ -158,8 +208,13 @@ public class CardSet extends Table {
 		return title;
 	}
 
-	public int getNumCards() {
-		return cards.size;
+	public void setSelected(boolean selected) {
+		this.selected = selected;
+	}
+
+	public void addCard(CardImageData newCard) {
+		newCard.setTextureAtlas(cardAtlas);
+		this.cards.add(newCard);
 	}
 
 	

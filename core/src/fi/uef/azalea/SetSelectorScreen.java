@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -25,20 +26,23 @@ public class SetSelectorScreen extends Screen {
 	private Stage stage;
 	private ScrollPane cardSetScrollPane;
 	
+	private NewCardSetCreator newCardSetCreator;
+	
 	private Array<CardSet> cardSets;
 	private Array<CardSet> selectedSets;
 	
 	private int cardAmount = 0;
+	
+	private final TextButton doneButton;
+	private boolean selectForEditor = false; //TODO: tape and glue ;-;
 	
 	public SetSelectorScreen() {
 		
 		cardSets = new Array<CardSet>();
 		selectedSets = new Array<CardSet>();
 		
-		reloadCardSets();
-		
 		stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-		//stage.setDebugAll(true);
+		stage.setDebugAll(true);
 		
 		cardListTable = new Table();
 		
@@ -50,21 +54,18 @@ public class SetSelectorScreen extends Screen {
 		//cardSetScrollPane.setupFadeScrollBars(1, 1);
 		cardSetScrollPane.setFadeScrollBars(false);
 
-		final Dialog cardAmountDialog = new Dialog("SELECT_AMOUNT", Statics.SKIN);
+		final Dialog cardAmountDialog = new Dialog("SELECT_AMOUNT", Statics.SKIN); //TODO
 		
-		TextButton dialogOK = new TextButton("OK", Statics.SKIN);
-		dialogOK.setSize(100, 70);
+		TextButton dialogOK = new TextButton("OK", Statics.SKIN); //TODO
 		dialogOK.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				cardAmountDialog.hide();
-				
 				Azalea.changeState(AppState.game);
 			}
 		});
 				
-		TextButton dialogCancel = new TextButton("CANCEL", Statics.SKIN);
-		dialogCancel.setSize(100, 70);
+		TextButton dialogCancel = new TextButton("CANCEL", Statics.SKIN); //TODO
 		dialogCancel.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
@@ -72,36 +73,37 @@ public class SetSelectorScreen extends Screen {
 			}
 		});
 
-		cardAmountDialog.button(dialogCancel);
-		cardAmountDialog.button(dialogOK);
+		cardAmountDialog.getButtonTable().add(dialogCancel).size(200, 80).align(Align.left).growX();
+		cardAmountDialog.getButtonTable().add(dialogOK).size(200, 80).align(Align.right).growX();
 		
-		
-		final TextButton doneButton = new TextButton("PLAY", Statics.SKIN); //TODO
+		doneButton = new TextButton("", Statics.SKIN); //TODO
 		doneButton.setDisabled(true);
 		doneButton.setVisible(false);
 		doneButton.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				cardAmountDialog.getContentTable().clear();
-				int maxNumCards = 2;
-				for(CardSet s : selectedSets){
-					maxNumCards += s.getNumCards();
-				}
-				final Slider amountSlider = new Slider(2, maxNumCards, 1, false, Statics.SKIN);
-				final Label amountLabel = new Label("Kortteja: " + cardAmount, Statics.SKIN); //TODO
-				amountSlider.setSize(400, 100);
-				amountSlider.addListener(new ChangeListener() {
-					@Override
-					public void changed(ChangeEvent event, Actor actor) {
-						cardAmount = (int) amountSlider.getValue();
-						amountLabel.setText("Kortteja: " + cardAmount); //TODO
+				if(!selectForEditor){
+					cardAmountDialog.getContentTable().clear();
+					int maxNumCards = 2;
+					for(CardSet s : selectedSets){
+						maxNumCards += s.getCards().size;
 					}
-				});
-				cardAmountDialog.getContentTable().add(amountLabel).expandX();
-				cardAmountDialog.getContentTable().row();
-				cardAmountDialog.getContentTable().add(amountSlider).size(400, 80).expandX();
-				cardAmountDialog.setBounds(0, 0, Gdx.graphics.getWidth()*0.6f, Gdx.graphics.getHeight()*0.6f);
-				cardAmountDialog.show(stage);
+					final Slider amountSlider = new Slider(2, (maxNumCards > 32 ? 32 : maxNumCards), 1, false, Statics.SKIN);
+					final Label amountLabel = new Label("Kortteja: " + cardAmount, Statics.SKIN); //TODO
+					amountSlider.addListener(new ChangeListener() {
+						@Override
+						public void changed(ChangeEvent event, Actor actor) {
+							cardAmount = (int) amountSlider.getValue();
+							amountLabel.setText("Kortteja: " + cardAmount); //TODO
+						}
+					});
+					cardAmountDialog.getContentTable().add(amountLabel).align(Align.center).expand();
+					cardAmountDialog.getContentTable().row();
+					cardAmountDialog.getContentTable().add(amountSlider).size(700, 80).expandX();
+					cardAmountDialog.show(stage);
+				} else {
+					Azalea.changeState(AppState.edit);
+				}
 			}
 		});
 		
@@ -113,11 +115,61 @@ public class SetSelectorScreen extends Screen {
 			}
 		});
 		
+		newCardSetCreator = new NewCardSetCreator();
+		newCardSetCreator.addListener(new ChangeListener() {
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				selectedSets.clear();
+				FileHandle targetFile = Gdx.files.local("sets/" + System.nanoTime() + ".set");
+				if(!targetFile.exists()) {
+					CardSet newSet = new CardSet(targetFile);
+					selectedSets.add(newSet);
+					cardSets.add(newSet);
+					Azalea.changeState(AppState.edit);
+				} else {
+					System.out.println("Not gonna make a new set on top of existing file.");
+				}
+			}
+		});
+		
+		Table content = new Table();
+		content.setFillParent(true);
+		content.add(new Label("SELECT_SET", Statics.SKIN)).colspan(2).pad(20).align(Align.center); //TODO
+		content.row();
+		content.add(cardSetScrollPane).colspan(2).pad(20).fill().expand();
+		content.row();
+		content.add(cancelButton).pad(8).size(200, 80).align(Align.left).growX();
+		content.add(doneButton).pad(8).size(200, 80).align(Align.right).growX();
+		stage.addActor(content);
+
+	}
+	
+	private void reloadCardSets() {
+		cardSets.clear();
+		cardListTable.clear();
+        if(selectForEditor){
+            cardListTable.add(newCardSetCreator).pad(5).growX();
+            cardListTable.row();
+        }
+        
+        /*
+		for (String path : Azalea.getFileSources()) {
+			FileHandle[] files = Gdx.files.local(path).list("set");
+			System.out.println("Scanning path " + path);
+			if (files.length > 0)
+				for (FileHandle file : files) {
+					cardSets.add(new CardSet(new CardSetData(file)));
+				}
+		}
+		*/
+		
+		//Add listeners and prepare table
 		for(final CardSet s : cardSets){
 			s.addListener(new ChangeListener() {
 				@Override
-				public void changed(ChangeEvent event, Actor actor) {					
+				public void changed(ChangeEvent event, Actor actor) {
 					if(s.isSelected()){
+						if(selectedSets.size > 0 && selectForEditor) unselectAll();
 						selectedSets.add(s);
 					} else {
 						selectedSets.removeValue(s, true);
@@ -135,49 +187,42 @@ public class SetSelectorScreen extends Screen {
 			cardListTable.row();
 		}
 		
-		Table content = new Table();
-		content.setFillParent(true);
-		content.add(new Label("SELECT_SET", Statics.SKIN)).colspan(2).pad(20).align(Align.center); //TODO
-		content.row();
-		content.add(cardSetScrollPane).colspan(2).pad(20).fill().expand();
-		content.row();
-		content.add(cancelButton).pad(8).size(200, 80).align(Align.left).growX();
-		content.add(doneButton).pad(8).size(200, 80).align(Align.right).growX();
-		stage.addActor(content);
-		
-		Gdx.input.setInputProcessor(stage);
-        
 	}
-	
-	private void reloadCardSets() {
-		cardSets.clear();
-		for(String path : Azalea.getFileSources()){
-			FileHandle[] files = Gdx.files.local(path).list();
-			if(files.length > 0)
-			for(FileHandle file: files) {
-				if(file.isDirectory()){
-					cardSets.add(new CardSet(file));
-				}
-			}
-		}
+
+	public CardSet getSelectedSet(){
+		return selectedSets.first();
 	}
 
 	public Array<CardImageData> getCards() {
-		
 		Array<CardImageData> cards = new Array<CardImageData>();
 		int n = cardAmount/selectedSets.size;
 		for(CardSet s : selectedSets){
 			cards.addAll(s.getRandomCards(n));
 		}
-		return cards; 
-		
-		//return selectedSets.get(0).getRandomCards(10);
+		return cards;
+	}
+	
+	public void selectForEditor(boolean editorSelect){
+		this.selectForEditor = editorSelect;
+		if(!editorSelect){
+			doneButton.setText("PLAY"); //TODO
+		} else {
+			doneButton.setText("EDIT"); //TODO
+		}
+	}
+
+	private void unselectAll() {
+		for(CardSet s : selectedSets){
+			s.setSelected(false);
+		}
+		selectedSets.clear();
 	}
 	
 	@Override
 	public void init() {
 		Gdx.input.setInputProcessor(stage);
-		
+		unselectAll();
+        reloadCardSets();
 		ready = true;
 	}
 	
@@ -186,7 +231,6 @@ public class SetSelectorScreen extends Screen {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
-		
 	}
 
 	@Override
