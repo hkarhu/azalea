@@ -17,11 +17,10 @@ public class NewCardSetCreator extends Table {
 		
 		coverTextureBack = new TextureRegionDrawable(Statics.TEXREGION_TITLE_EMPTY);
 		
-		final TextButton selectButton = new TextButton("NEW", Statics.SKIN); //TODO
+		final TextButton selectButton = new TextButton("Uusi", Statics.SKIN); //TODO
 		
 		this.add(selectButton).pad(8).size(150, 100).align(Align.left);
 		if(coverTextureTitle == null) this.add(new Label("Uusi korttipakka", Statics.SKIN)).align(Align.left).expand().fill(); //TODO
-		this.add(new Label(" CARDS", Statics.SKIN)).align(Align.bottomRight).padRight(30).padBottom(20).expandX(); //TODO
 		
 	}
 

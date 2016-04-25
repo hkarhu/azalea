@@ -8,7 +8,9 @@ import java.io.File;
 import javax.swing.JFileChooser;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 
+import fi.uef.azalea.CardImageData;
 import fi.uef.azalea.PlatformBridge;
 
 public class DesktopPlatformBridge implements PlatformBridge {
@@ -20,17 +22,23 @@ public class DesktopPlatformBridge implements PlatformBridge {
 		fc.setVisible(false);
 		
 	}
-	
+
 	@Override
-	public void getGalleryImagePath() {
-		Gdx.app.log("DesktopGalleryOpener", "Not implemented");
+	public void doImageSelect(CardImageData cid) {
+		fc.setVisible(true);
 	}
 
 	@Override
-	public String getSelectedFilePath() {
-		fc.showOpenDialog(null);
-		return fc.getSelectedFile().getAbsolutePath();
+	public void doImageCapture(CardImageData cid) {
+		// TODO Auto-generated method stub
+		fc.setVisible(true);
 	}
+
+	@Override
+	public FileHandle getImagePath() {
+		return null;
+	}
+	
 
 	
 	

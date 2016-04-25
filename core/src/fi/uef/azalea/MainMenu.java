@@ -28,10 +28,10 @@ public class MainMenu extends Screen {
 		Table t = new Table(Statics.SKIN);
 		quit = new TextButton("Lopeta", Statics.SKIN);
 		quit.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.1f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
-		start = new TextButton("Pelaa muistipeliae", Statics.SKIN);
-		start.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.22f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
 		edit = new TextButton("Muokkaa kortteja", Statics.SKIN);
-		edit.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.34f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
+		edit.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.22f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
+		start = new TextButton("Pelaa muistipeliä", Statics.SKIN);
+		start.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.34f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
 		t.addActor(quit);
 		t.addActor(start);
 		t.addActor(edit);

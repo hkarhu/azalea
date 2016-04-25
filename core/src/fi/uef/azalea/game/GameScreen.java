@@ -20,6 +20,7 @@ import com.badlogic.gdx.utils.Array;
 import fi.uef.azalea.Statics;
 import fi.uef.azalea.Azalea.AppState;
 import fi.uef.azalea.Azalea;
+import fi.uef.azalea.CardImageData;
 import fi.uef.azalea.Screen;
 import fi.uef.azalea.Statics;
 import fi.uef.azalea.camera.ResizeableOrthographicCamera;
@@ -42,7 +43,8 @@ public class GameScreen extends Screen implements InputProcessor {
 	private Decal prizeDecal;
 	private Decal correctDecal;
 	private Decal wrongDecal;
-
+	private Decal winDecal;
+	
 	//Game states and animations
 	private enum GameStates { pick, show_wrong, show_success, hide, end }
 	private GameStates lastState = null;
@@ -69,10 +71,14 @@ public class GameScreen extends Screen implements InputProcessor {
 		TextureRegion darken = new TextureRegion(Statics.DARKEN_MASK);
 		prizeDecal = Decal.newDecal(darken, true);
 		prizeDecal.setPosition(0, 0, 100);
+		
 		darkenDecal = Decal.newDecal(darken, true);
 		darkenDecal.setBlending(GL20.GL_DST_COLOR, GL20.GL_ONE_MINUS_SRC_ALPHA); //Blending "multiply"
 		darkenDecal.setPosition(0, 0, 1);
-		darkenDecal.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());		
+		darkenDecal.setDimensions(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		
+		winDecal = Decal.newDecal(new TextureRegion(Statics.TEX_WIN), true);
+		winDecal.setPosition(0, 0, 100);
 	}
 	
 	private void swapState(GameStates newState) {
@@ -291,6 +297,9 @@ public class GameScreen extends Screen implements InputProcessor {
 				openedCards.get(1).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler;
 				openedCards.get(0).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler;
 				break;
+			case end:
+				decalBatch.add(winDecal);
+				wrongDecal.setScale(0.5f+(2+(float)Math.sin(Gdx.graphics.getFrameId()*0.1f))*0.1f);
 				
 			default:
 				break;

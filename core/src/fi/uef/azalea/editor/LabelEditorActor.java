@@ -1,8 +1,5 @@
 package fi.uef.azalea.editor;
 
-import java.awt.Color;
-
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -23,10 +20,10 @@ public class LabelEditorActor extends Actor {
 
 	public LabelEditorActor(){
 
-		labelTexturePixmap = new Pixmap(512, 128, Format.RGBA8888);
+		labelTexturePixmap = new Pixmap(1024, 256, Format.RGBA8888);
 		labelEditTexture = new Texture(labelTexturePixmap);
 		//setBounds(getX(),getY(),titleTexture.getWidth(),titleTexture.getHeight());
-
+		
 		this.addListener(new InputListener() {
 
 			float lx = 0, ly = 0;
@@ -38,18 +35,20 @@ public class LabelEditorActor extends Actor {
 			}
 
 			public void touchDragged(InputEvent event, float x, float y, int pointer){
-				Pixmap.setBlending(Blending.SourceOver);
+				
 				
 				if(erase){
+					Pixmap.setBlending(Blending.None);
 					labelTexturePixmap.setColor(0,0,0,0);
 				} else {
-					labelTexturePixmap.setColor(1,1,1,0.5f);
+					Pixmap.setBlending(Blending.SourceOver);
+					labelTexturePixmap.setColor(1,1,1,0.7f);
 				}
 
 				x = trX(x);
 				y = trY(y);
 
-				for(float r=0; r < Math.PI*2; r+=0.2f){
+				for(float r=0; r < Math.PI*2; r+=0.1f){
 					if(erase){
 						labelTexturePixmap.drawLine((int)(lx + Math.sin(r)*Statics.ERASER_RADIUS), (int)(ly + Math.cos(r)*Statics.ERASER_RADIUS), (int)(x + Math.sin(r)*Statics.ERASER_RADIUS), (int)(y + Math.cos(r)*Statics.ERASER_RADIUS));
 					} else {
@@ -63,8 +62,6 @@ public class LabelEditorActor extends Actor {
 				labelEditTexture.draw(labelTexturePixmap, 0,0);
 			}
 		});
-		
-		
 		
 	}
 	
@@ -93,6 +90,13 @@ public class LabelEditorActor extends Actor {
 	@Override
 	public void draw(Batch batch, float alpha){
 		batch.draw(labelEditTexture, getX(), getY(), getWidth(), getHeight());
+	}
+
+	public void setLabel(Pixmap p) {
+		labelTexturePixmap.setColor(0, 0, 0, 0);
+		labelTexturePixmap.fillRectangle(0, 0, labelTexturePixmap.getWidth(), labelTexturePixmap.getHeight());
+		labelTexturePixmap.drawPixmap(p, 0, 0, p.getWidth(), p.getHeight(), 0, 0, labelEditTexture.getWidth(), labelEditTexture.getHeight());
+		labelEditTexture.draw(labelTexturePixmap, 0,0);
 	}
 
 }

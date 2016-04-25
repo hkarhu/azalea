@@ -8,17 +8,21 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.scenes.scene2d.ui.Value;
 
 public class Statics {
 
-	public static final String TITLE = "Azalea 0.1b";
+	public static final String TITLE = "Azalea 0.2b";
+	public static final boolean DEBUG = true;
+	
 	public static final int DEFAULT_WIDTH = 1280;
 	public static final int DEFAULT_HEIGHT = 800;
-	public static final int CARD_PIXMAP_SIZE = 512;
+	public static final int CARD_PIXMAP_SIZE = 300;
 	
-	public static final float BRUSH_RADIUS = 2.5f;
+	public static final float BRUSH_RADIUS = 0.75f;
 	public static final float ERASER_RADIUS = 5.0f;
+	
+	public static final String CARD_IMAGE_CACHE = "card_cache";
 	
 	public static final float cardMargin = 2f; //How much space between cards
 	public static final float cardScaler = 300f; //How much cards will be scaled during wrong pair selection
@@ -29,9 +33,19 @@ public class Statics {
 	public static Skin SKIN = new Skin(Gdx.files.internal("uiskin.json"));
 	public static final Color SET_DARKEN_TINT = new Color(0, 0, 0, 0.8f);
 	
-	public static Texture TEX_CARD_EMPTY = new Texture(Gdx.files.internal("card_new.png"));
+	public static final float REL_BUTTON_PADDING = 0.001f;
+	public static final float REL_BUTTON_WIDTH = 0.16f;
+	public static final float REL_BUTTON_HEIGHT = 0.0625f;
+	public static final float REL_ITEM_PADDING = 0.015f;
 	
-	public static TextureRegion TEXREGION_TITLE_EMPTY = new TextureRegion(new Texture(Gdx.files.internal("deck_label_new.png")));
+	public static Texture TEX_CARD_EMPTY = new Texture(Gdx.files.internal("card_new.png"));
+	public static Texture TEX_NEW_CARD_BUTTON_UP = new Texture(Gdx.files.internal("card_new.png"));
+	public static Texture TEX_NEW_CARD_BUTTON_DOWN = new Texture(Gdx.files.internal("card_new.png"));
+	public static Texture TEX_WIN = new Texture(Gdx.files.internal("win.png"));
+	
+	public static Texture TEX_ICON_ERASE = new Texture(Gdx.files.internal("icon_erase.png"));
+	public static Texture TEX_ICON_DRAW = new Texture(Gdx.files.internal("icon_draw.png"));
+	public static Texture TEX_ICON_CLEAR = new Texture(Gdx.files.internal("icon_clear.png"));
 	
 	public static Texture MENU = new Texture(Gdx.files.internal("menu.png"));
 	public static Texture CORRECT = new Texture(Gdx.files.internal("right.png"));
@@ -41,6 +55,8 @@ public class Statics {
 	public static Texture IMAGE_FULLVIEW_BACKGROUND = new Texture(Gdx.files.internal("gray_bg.png"));
 	public static Texture DARKEN_MASK = new Texture(Gdx.files.internal("darkenmask.png"));
 	public static Texture LOADING = new Texture(Gdx.files.internal("load.png"));
+	
+	public static TextureRegion TEXREGION_TITLE_EMPTY = new TextureRegion(new Texture(Gdx.files.internal("deck_label_new.png")));
 	
 	public static String STRING_EDIT_SET = "";
 	public static String STRING_SELECT_SET = "";
@@ -59,6 +75,12 @@ public class Statics {
 	
 	public static void dispose(){
 		CARD_MASK_PIXMAP.dispose();
+		
+		TEX_CARD_EMPTY.dispose();
+		TEX_NEW_CARD_BUTTON_UP.dispose();
+		TEX_NEW_CARD_BUTTON_DOWN.dispose();
+		TEX_WIN.dispose();
+		
 		SKIN.dispose();
 	}
 	

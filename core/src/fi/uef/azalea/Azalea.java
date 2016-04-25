@@ -11,7 +11,8 @@ import fi.uef.azalea.game.GameScreen;
 
 public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	
-	private static SetSelectorScreen setSelector;
+	private static SetEditSelectorScreen setEditSelector;
+	private static SetGameSelectorScreen setGameSelector;
 	private static GameScreen gameScreen; 
 	private static MainMenu mainMenu;
 	private static EditorScreen editorScreen; 
@@ -33,14 +34,15 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	@Override
 	public void create () {
 		
-		Gdx.files.local("sets/").mkdirs();
+		if(!Gdx.files.local(Statics.CARD_IMAGE_CACHE).exists()) Gdx.files.local(Statics.CARD_IMAGE_CACHE).mkdirs();
 		
 		//Loading screen stuff
 		spriteBatch = new SpriteBatch();
 
 		//Screens need to be created here because constructors might need to access the render threads
 		mainMenu = new MainMenu();
-		setSelector = new SetSelectorScreen();
+		setEditSelector = new SetEditSelectorScreen();
+		setGameSelector = new SetGameSelectorScreen();
 		gameScreen = new GameScreen();
 		editorScreen = new EditorScreen();
 
@@ -73,7 +75,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 			case game:
 				gameScreen.ready = false;
 				currentScreen = gameScreen;
-				gameScreen.setBoard(setSelector.getCards(), 2); //Pairs only, for now
+				gameScreen.setBoard(setGameSelector.getCards(), 2); //Pairs only, for now
 				break;
 				
 			case menu:
@@ -81,17 +83,15 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 				break;
 				
 			case select_game:
-				setSelector.selectForEditor(false);
-				currentScreen = setSelector;
+				currentScreen = setGameSelector;
 				break;
 				
 			case select_edit:
-				setSelector.selectForEditor(true);
-				currentScreen = setSelector;
+				currentScreen = setEditSelector;
 				break;
 				
 			case edit:
-				editorScreen.setEditableSet(setSelector.getSelectedSet());
+				editorScreen.setEditableSet(setEditSelector.getSelectedSet());
 				currentScreen = editorScreen;
 				break;
 	
@@ -116,7 +116,8 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	public void dispose() {
 		mainMenu.dispose();
 		gameScreen.dispose();
-		setSelector.dispose();
+		setEditSelector.dispose();
+		setGameSelector.dispose();
 		editorScreen.dispose();
 		super.dispose();
 	}

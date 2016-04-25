@@ -4,11 +4,12 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.Pixmap.Format;
+import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -17,72 +18,86 @@ import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Json;
 
-import fi.uef.azalea.game.CardImageData;
+import fi.uef.azalea.editor.LabelEditorActor;
 
 public class CardSet extends Table {
 	
-	private final FileHandle datafile;
+	private final FileHandle dataFolder;
 	
-	private String title = "Uusi korttisarja"; //TODO
-	private TextureAtlas cardAtlas;
-	private Array<CardImageData> cards;
+	private String title = ""; //TODO
 	
-	private Label cardAmountLabel;
-	private Texture labelTextureBack;
-	private Texture labelTexture;
+	private Array<CardImageData> cards; //Serialize!
+	private Pixmap labelTextureBack; //Serialize!
+	private Pixmap labelTextureFront; //Serialize!
+	
+	private String amountString = "";
+
 	private Drawable labelDrawableBack;
-	private Drawable labelDrawable;
+	private Drawable labelDrawableFront;
 	
 	private boolean selected = false;
 		
-	public CardSet(FileHandle datafile) {
+	public CardSet(FileHandle dataFolder) {
 		
-		this.datafile = datafile;
+		this.dataFolder = dataFolder;
 		
-		cardAtlas = new TextureAtlas();
+		labelTextureBack = new Pixmap(1024, 128, Format.RGBA8888);
+		labelTextureFront = new Pixmap(512, 128, Format.RGBA4444);
 		cards = new Array<CardImageData>();
 		
-		final TextButton selectButton = new TextButton("SELECT", Statics.SKIN); //TODO
+		final TextButton selectButton = new TextButton("Valitse", Statics.SKIN, "toggle"); //TODO
 		selectButton.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				selected = !selected;
-				if(selected) selectButton.setText("SELECTED"); else selectButton.setText("SELECT"); //TODO  
+				if(selected){
+					selectButton.setText("Valittu");
+					selectButton.setChecked(true);
+				} else {
+					selectButton.setText("Valitse"); //TODO
+					selectButton.setChecked(false);
+				}
 			}
 		});
 		
-		cardAmountLabel = new Label(cards.size + " CARDS", Statics.SKIN);
+		Label cardAmountLabel = new Label(amountString, Statics.SKIN);
 		
 		this.add(selectButton).pad(8).size(150, 100).align(Align.left);
 		this.add(new Label(title, Statics.SKIN)).align(Align.left).expand().fill(); //TODO
-		this.add(cardAmountLabel).align(Align.bottomRight).padRight(30).padBottom(20).expandX(); //TODO		
-		
-		/*
-		FileHandle[] files = targetFolder.list();
-		cards = new Array<CardImageData>();
-		for(FileHandle file: files) {
-			cards.add(new CardImageData(file));
-		}
-		FileHandle labelFile = targetFolder.parent().child(title+"_label.png");
-		FileHandle backFile = targetFolder.parent().child(title+"_back.png");
-		
-		if(labelFile.exists()){
-			coverTextureTitle = new TextureRegionDrawable(new TextureRegion(new Texture(labelFile)));
-		} else {
-			coverTextureTitle = generateLabelTexture(title);
-		}
-		
-		if(backFile.exists()){
-			coverTextureBack = new TextureRegionDrawable(new TextureRegion(new Texture(backFile)));
-		} else {
-			coverTextureBack = generateBackgroundTexture(backFile);
-		}
-		*/
-
+		this.add(cardAmountLabel).align(Align.bottomRight).padRight(30).padBottom(20).expandX(); //TODO
 		
 	}
 	
+	public void loadData() {
+		CardSetData cardSetData = (new Json()).fromJson(CardSetData.class, dataFolder.child("meta.json"));
+		this.title = cardSetData.title;
+		
+		this.labelTextureFront = PixmapIO.readCIM(dataFolder.child("label_front.cim"));
+		this.labelTextureBack = PixmapIO.readCIM(dataFolder.child("label_back.cim"));
+		
+		this.labelDrawableFront = new TextureRegionDrawable(new TextureRegion(new Texture(labelTextureFront)));
+		this.labelDrawableBack = new TextureRegionDrawable(new TextureRegion(new Texture(labelTextureBack)));
+		
+		this.cards = cardSetData.cards;
+		amountString = cards.size + "korttia";
+	}
+	
+	public void saveData(){
+		CardSetData cardSet = new CardSetData();
+		cardSet.title = this.title;
+		cardSet.cards = this.cards;
+		(new Json()).toJson(cardSet, dataFolder.child("meta.json"));
+		PixmapIO.writeCIM(dataFolder.child("label_front.cim"), labelTextureFront);
+		PixmapIO.writeCIM(dataFolder.child("label_back.cim"), labelTextureBack);
+	}
+	
+	public void deleteData() {
+		dataFolder.deleteDirectory();
+	}
+
+	/*
 	public void setLabelTexture(Pixmap newLabel){
 		Pixmap.setBlending(Blending.None);
 		
@@ -92,13 +107,18 @@ public class CardSet extends Table {
 		p.setColor(1,1,1,0);
 		p.drawRectangle(1,1,511,127);
 		p.drawPixmap(newLabel, 0,0, newLabel.getWidth(), newLabel.getHeight(), 2, 2, 510, 126);
-		labelTexture = new Texture(p);
+		//labelTextureFront = new Texture(p);
 		p.dispose();
+		//TextureRegion region = new TextureRegion(labelTextureFront);
 		
-		TextureRegion region = new TextureRegion(labelTexture);
-		
-		labelDrawable = new TextureRegionDrawable(region);
+		//labelDrawable = new TextureRegionDrawable(region);
 	}
+	
+	/*
+	public void generateCardTexture(){
+
+	}
+	
 
 	private Drawable generateLabelTexture(String title){
 		Pixmap.setBlending(Blending.None);
@@ -122,7 +142,6 @@ public class CardSet extends Table {
 		Pixmap p = new Pixmap(1024, 128, Format.RGBA8888);
 		p.setColor(1,1,1,1);
 		p.fill();
-
 		
 		final int sampleWidth = 64;
 		final int scaler = 3;
@@ -130,7 +149,7 @@ public class CardSet extends Table {
 		
 		int shift = 0;
 		for(CardImageData cid : getRandomCards(1024/sampleWidth)){
-			Pixmap raw = new Pixmap(cid.sourceFile);
+			Pixmap raw = new Pixmap(cid.getSourceFile());
 			
 			float s = 0;
 			for(int yi=0; yi < 128; yi += 1){
@@ -160,7 +179,12 @@ public class CardSet extends Table {
 		Drawable d = new TextureRegionDrawable(region);
 		return d;
 	}
+	*/
 
+	public void updateLabelFront(Pixmap labelPixmap) {
+		this.labelTextureFront.drawPixmap(labelPixmap, 0,0, labelPixmap.getWidth(), labelPixmap.getHeight(), 2, 2, 510, 126);
+	}
+	
 	public Array<CardImageData> getCards(){
 		return cards;
 	}
@@ -178,31 +202,6 @@ public class CardSet extends Table {
 		return selected;
 	}
 	
-	public void save(){
-		
-	}
-	
-	@Override
-	protected void drawBackground (Batch batch, float parentAlpha, float x, float y) {
-		
-		if(selected) batch.setColor(1,1,1,1); else batch.setColor(0.5f,0.5f,0.5f,1);
-		if(labelDrawableBack != null) labelDrawableBack.draw(batch, x, y, getWidth(), getHeight());
-		
-		//Label
-		if(labelDrawable != null){
-			float sizeScaler = 0.8f/(labelDrawable.getMinHeight()/getHeight());
-			float shadowShift = 8;
-			float yShift = (getHeight()-(labelDrawable.getMinHeight()*sizeScaler))*0.5f;
-			float xShift = 200;
-			
-			batch.setColor(0,0,0,0.8f);
-			labelDrawable.draw(batch, x+xShift+shadowShift, y+yShift-shadowShift, labelDrawable.getMinWidth()*sizeScaler, labelDrawable.getMinHeight()*sizeScaler);
-			batch.setColor(1,1,1,1);
-			labelDrawable.draw(batch, x+xShift, y+yShift, labelDrawable.getMinWidth()*sizeScaler, labelDrawable.getMinHeight()*sizeScaler);
-		}
-		
-	}
-	
 	@Override
 	public String toString() {
 		return title;
@@ -213,9 +212,37 @@ public class CardSet extends Table {
 	}
 
 	public void addCard(CardImageData newCard) {
-		newCard.setTextureAtlas(cardAtlas);
 		this.cards.add(newCard);
+		amountString = cards.size + "korttia";
+	}
+		
+	@Override
+	protected void drawBackground (Batch batch, float parentAlpha, float x, float y) {
+		
+		if(selected) batch.setColor(1,1,1,1); else batch.setColor(0.5f,0.5f,0.5f,1);
+		if(labelDrawableBack != null) labelDrawableBack.draw(batch, x, y, getWidth(), getHeight());
+		
+		//Label
+		if(labelDrawableFront != null){
+			float sizeScaler = 0.8f/(labelDrawableFront.getMinHeight()/getHeight());
+			float shadowShift = 8;
+			float yShift = (getHeight()-(labelDrawableFront.getMinHeight()*sizeScaler))*0.5f;
+			float xShift = 200;
+			
+			batch.setColor(0,0,0,0.8f);
+			labelDrawableFront.draw(batch, x+xShift+shadowShift, y+yShift-shadowShift, labelDrawableFront.getMinWidth()*sizeScaler, labelDrawableFront.getMinHeight()*sizeScaler);
+			batch.setColor(1,1,1,1);
+			labelDrawableFront.draw(batch, x+xShift, y+yShift, labelDrawableFront.getMinWidth()*sizeScaler, labelDrawableFront.getMinHeight()*sizeScaler);
+		}
+		
 	}
 
-	
+	public Pixmap getLabelFrontPixmap() {
+		return labelTextureFront;
+	}
+
+	public void removeCard(CardImageData c) {
+		cards.removeValue(c, true);
+	}
+
 }

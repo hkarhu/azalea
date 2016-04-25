@@ -3,8 +3,8 @@ package fi.uef.azalea.editor;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 
+import fi.uef.azalea.CardImageData;
 import fi.uef.azalea.Statics;
-import fi.uef.azalea.game.CardImageData;
 
 public class EditorCard extends Table {
 

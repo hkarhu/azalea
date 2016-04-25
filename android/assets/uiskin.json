@@ -4,11 +4,13 @@ com.badlogic.gdx.graphics.Color: {
 	light_grey: { r: 0.8, g: 0.8, b: 0.8, a: 1 },
 	white: { r: 1, g: 1, b: 1, a: 1 },
 	red: { r: 1, a: 1 },
-	black: { a: 1 },
-	grey: { r: 0.7, g: 0.7, b: 0.7, a: 1 }
+	grey: { r: 0.7, g: 0.7, b: 0.7, a: 1 },
+	dark_grey: { r: 0.4, g: 0.4, b: 0.4, a: 1 },
+	black: { a: 1 }
 },
 com.badlogic.gdx.graphics.g2d.BitmapFont: {
-	font_deja_vu_serif_32pt_bold: { file: font_deja_vu_serif_32pt_bold.fnt },
+	title-font: { file: title-font.fnt },
+	button-font: { file: button-font.fnt },
 	default-font: { file: default.fnt }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
@@ -22,23 +24,33 @@ com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
 },
 com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 	default: {
-		font: font_deja_vu_serif_32pt_bold,
-		fontColor: { a: 1, b: 1, g: 1, r: 1 },
-		disabledFontColor: { a: 1, b: 0.8, g: 0.8, r: 0.8 },
-		up: default-round,
-		down: default-round-down
+		font: button-font,
+		fontColor: { a: 1 },
+		downFontColor: { a: 1, b: 1, g: 1, r: 1 },
+		disabledFontColor: { a: 1, b: 0.4, g: 0.4, r: 0.4 },
+		up: button_default,
+		down: button_default_invert
+	},
+	contrast: {
+		font: button-font,
+		fontColor: { a: 1 },
+		downFontColor: { a: 1, b: 1, g: 1, r: 1 },
+		up: button_base,
+		down: button_base_invert
 	},
 	toggle: {
-		font: default-font,
-		fontColor: { a: 1, b: 1, g: 1, r: 1 },
-		downFontColor: { a: 1, r: 1 },
-		up: default-round,
-		down: default-round-down,
-		checked: default-round-down
+		font: button-font,
+		fontColor: { a: 1 },
+		downFontColor: { a: 1, b: 0.4, g: 0.4, r: 0.4 },
+		overFontColor: { a: 1 },
+		checkedFontColor: { a: 1 },
+		up: button_default,
+		down: button_base_invert,
+		checked: button_selected
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
-	default: { imageUp: paint_brush, up: default-round, down: default-round-down }
+	default: { up: button_default, down: button_base, checked: button_selected }
 },
 com.badlogic.gdx.scenes.scene2d.ui.SplitPane$SplitPaneStyle: {
 	default-vertical: { handle: default-splitpane-vertical },
@@ -48,8 +60,8 @@ com.badlogic.gdx.scenes.scene2d.ui.Touchpad$TouchpadStyle: {
 	default: { background: default-pane, knob: default-round-large }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
-	default: { up: default-round-large, down: default-round-down },
-	toggle: { up: default-round, down: default-round-down, checked: default-round-down }
+	default: { up: button_default, down: button_base_invert },
+	toggle: { up: button_default, down: button_default_invert, checked: button_selected }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
 	default: {
@@ -88,21 +100,21 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 		fontColor: { a: 1, b: 0.7, g: 0.7, r: 0.7 }
 	},
 	default: {
-		font: default-font,
-		fontColor: { a: 1, b: 1, g: 1, r: 1 }
+		font: button-font,
+		fontColor: { a: 1, b: 0.8, g: 0.8, r: 0.8 }
 	},
 	error: {
 		font: default-font,
 		fontColor: { a: 1, r: 1 }
 	},
 	title: {
-		font: default-font,
-		fontColor: { a: 1, b: 0.8, g: 0.8, r: 0.8 }
+		font: title-font,
+		fontColor: { a: 1, b: 1, g: 1, r: 1 }
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
 	default: {
-		font: font_deja_vu_serif_32pt_bold,
+		font: button-font,
 		fontColorSelected: { a: 1, b: 1, g: 1, r: 1 },
 		fontColorUnselected: { a: 1, b: 1, g: 1, r: 1 },
 		selection: default-select-selection
@@ -119,7 +131,7 @@ com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
 	default: {
 		checkboxOn: check-on,
 		checkboxOff: check-off,
-		font: font_deja_vu_serif_32pt_bold,
+		font: default-font,
 		fontColor: { a: 1, b: 1, g: 1, r: 1 }
 	}
 },
@@ -127,7 +139,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle: {
 	default: { plus: tree-plus, minus: tree-minus, selection: default-select-selection }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
-	default-horizontal: { background: default-slider, knob: slider }
+	default-horizontal: { background: default-scroll, knob: slider }
 },
 com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle: {
 	default: {
