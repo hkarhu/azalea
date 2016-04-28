@@ -3,8 +3,6 @@ package fi.uef.azalea;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.utils.Array;
 
 import fi.uef.azalea.editor.EditorScreen;
 import fi.uef.azalea.game.GameScreen;
@@ -24,8 +22,8 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	public static PlatformBridge platform;
 	
 	//Loading screen
-	private SpriteBatch spriteBatch;
-	private static float load_transition = 1;
+	//private SpriteBatch spriteBatch;
+	//private static float load_transition = 1;
 	
 	public Azalea(PlatformBridge p) {
 		platform = p;
@@ -37,8 +35,10 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 		if(!Gdx.files.local(Statics.CARD_IMAGE_CACHE).exists()) Gdx.files.local(Statics.CARD_IMAGE_CACHE).mkdirs();
 		
 		//Loading screen stuff
-		spriteBatch = new SpriteBatch();
+		//spriteBatch = new SpriteBatch();
 
+		Statics.SKIN.getFont("large-font").getData().setScale(Gdx.graphics.getWidth()*0.0005f);
+		
 		//Screens need to be created here because constructors might need to access the render threads
 		mainMenu = new MainMenu();
 		setEditSelector = new SetEditSelectorScreen();
@@ -70,7 +70,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	
 	//Toggle screens and handle diipadaapa
 	public static void changeState(AppState newState){
-		load_transition = 1;
+		//load_transition = 1;
 		switch (newState) {
 			case game:
 				gameScreen.ready = false;

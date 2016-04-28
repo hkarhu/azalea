@@ -16,7 +16,9 @@ public class LabelEditorActor extends Actor {
 	public boolean editing = false;
 	private Texture labelEditTexture;
 	private Pixmap labelTexturePixmap;
+	private boolean edit = false;
 	private boolean erase = false;
+	private boolean newTexture = true;
 
 	public LabelEditorActor(){
 
@@ -29,6 +31,8 @@ public class LabelEditorActor extends Actor {
 			float lx = 0, ly = 0;
 
 			public boolean touchDown (InputEvent event, float x, float y, int pointer, int button) {
+				if(!edit) return true;
+				newTexture = false;
 				lx = trX(x);
 				ly = trY(y);
 				return true;
@@ -36,6 +40,7 @@ public class LabelEditorActor extends Actor {
 
 			public void touchDragged(InputEvent event, float x, float y, int pointer){
 				
+				if(!edit) return;
 				
 				if(erase){
 					Pixmap.setBlending(Blending.None);
@@ -73,11 +78,17 @@ public class LabelEditorActor extends Actor {
 		return ((getHeight()-y)/getHeight())*labelTexturePixmap.getHeight();
 	}
 	
+	public void setEdit(boolean edit){
+		this.edit = edit;
+	}
+	
 	public void setErase(boolean erase){
 		this.erase = erase;
 	}
 	
 	public void clearTexture(){
+		newTexture = true;
+		Pixmap.setBlending(Blending.None);
 		labelTexturePixmap.setColor(0, 0, 0, 0);
 		labelTexturePixmap.fillRectangle(0, 0, labelTexturePixmap.getWidth(), labelTexturePixmap.getHeight());
 		labelEditTexture.draw(labelTexturePixmap, 0,0);
@@ -89,14 +100,14 @@ public class LabelEditorActor extends Actor {
 	
 	@Override
 	public void draw(Batch batch, float alpha){
+		if(newTexture) batch.draw(Statics.TEX_TITLE_HELP, getX(), getY());
 		batch.draw(labelEditTexture, getX(), getY(), getWidth(), getHeight());
 	}
 
 	public void setLabel(Pixmap p) {
-		labelTexturePixmap.setColor(0, 0, 0, 0);
-		labelTexturePixmap.fillRectangle(0, 0, labelTexturePixmap.getWidth(), labelTexturePixmap.getHeight());
 		labelTexturePixmap.drawPixmap(p, 0, 0, p.getWidth(), p.getHeight(), 0, 0, labelEditTexture.getWidth(), labelEditTexture.getHeight());
 		labelEditTexture.draw(labelTexturePixmap, 0,0);
+		newTexture = false;
 	}
 
 }

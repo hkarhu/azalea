@@ -4,13 +4,11 @@ com.badlogic.gdx.graphics.Color: {
 	light_grey: { r: 0.8, g: 0.8, b: 0.8, a: 1 },
 	white: { r: 1, g: 1, b: 1, a: 1 },
 	red: { r: 1, a: 1 },
-	grey: { r: 0.7, g: 0.7, b: 0.7, a: 1 },
-	dark_grey: { r: 0.4, g: 0.4, b: 0.4, a: 1 },
-	black: { a: 1 }
+	black: { a: 1 },
+	grey: { r: 0.7, g: 0.7, b: 0.7, a: 1 }
 },
 com.badlogic.gdx.graphics.g2d.BitmapFont: {
-	title-font: { file: title-font.fnt },
-	button-font: { file: button-font.fnt },
+	large-font: { file: large-font.fnt },
 	default-font: { file: default.fnt }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
@@ -20,118 +18,110 @@ com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle: {
-	default: { background: default-scroll, knobBefore: default-round-large }
+	default: { background: button_base_invert, knobBefore: button_base }
 },
 com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle: {
 	default: {
-		font: button-font,
+		font: large-font,
 		fontColor: { a: 1 },
-		downFontColor: { a: 1, b: 1, g: 1, r: 1 },
-		disabledFontColor: { a: 1, b: 0.4, g: 0.4, r: 0.4 },
-		up: button_default,
-		down: button_default_invert
-	},
-	contrast: {
-		font: button-font,
-		fontColor: { a: 1 },
-		downFontColor: { a: 1, b: 1, g: 1, r: 1 },
+		downFontColor: { a: 1, b: 0.7, g: 0.7, r: 0.7 },
+		disabledFontColor: { a: 1, b: 0.8, g: 0.8, r: 0.8 },
 		up: button_base,
-		down: button_base_invert
+		down: button_pressed
 	},
 	toggle: {
-		font: button-font,
+		font: large-font,
 		fontColor: { a: 1 },
-		downFontColor: { a: 1, b: 0.4, g: 0.4, r: 0.4 },
-		overFontColor: { a: 1 },
-		checkedFontColor: { a: 1 },
-		up: button_default,
-		down: button_base_invert,
+		downFontColor: { a: 1, b: 0.7, g: 0.7, r: 0.7 },
+		disabledFontColor: { a: 1, b: 0.8, g: 0.8, r: 0.8 },
+		up: button_base,
+		down: button_pressed,
 		checked: button_selected
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle: {
-	default: { up: button_default, down: button_base, checked: button_selected }
+	default: { imageUp: paint_brush, up: button_base, down: button_pressed }
 },
 com.badlogic.gdx.scenes.scene2d.ui.SplitPane$SplitPaneStyle: {
 	default-vertical: { handle: default-splitpane-vertical },
 	default-horizontal: { handle: default-splitpane }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Touchpad$TouchpadStyle: {
-	default: { background: default-pane, knob: default-round-large }
+	default: { background: button_pressed, knob: button_selected }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle: {
-	default: { up: button_default, down: button_base_invert },
-	toggle: { up: button_default, down: button_default_invert, checked: button_selected }
+	default: { up: button_base, down: button_base_invert },
+	toggle: { up: button_base, down: button_base_invert, checked: default-round-down }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
 	default: {
-		background: default-window,
-		titleFont: default-font,
+		background: button_base_invert,
+		titleFont: large-font,
 		titleFontColor: { a: 1, b: 1, g: 1, r: 1 }
 	},
 	dialog: {
-		background: default-window,
-		titleFont: default-font,
-		titleFontColor: { a: 1, b: 1, g: 1, r: 1 },
-		stageBackground: dialogDim
+		background: button_base_invert,
+		titleFont: large-font,
+		titleFontColor: { a: 1, b: 1, g: 1, r: 1 }
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle: {
 	default: {
-		font: default-font,
+		font: large-font,
 		fontColor: { a: 1, b: 1, g: 1, r: 1 },
-		background: textfield,
+		background: button_base_invert,
 		cursor: cursor,
 		selection: selection
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle: {
 	default: {
-		background: default-rect,
-		hScroll: default-scroll,
-		hScrollKnob: default-round-large,
-		vScroll: default-scroll,
-		vScrollKnob: default-round-large
+		background: button_base_invert,
+		hScroll: button_pressed,
+		hScrollKnob: button_base,
+		vScroll: button_pressed,
+		vScrollKnob: button_base
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	optional: {
-		font: default-font,
+		font: large-font,
 		fontColor: { a: 1, b: 0.7, g: 0.7, r: 0.7 }
 	},
 	default: {
-		font: button-font,
-		fontColor: { a: 1, b: 0.8, g: 0.8, r: 0.8 }
+		font: large-font,
+		fontColor: { a: 1, b: 1, g: 1, r: 1 }
 	},
 	error: {
-		font: default-font,
+		font: large-font,
 		fontColor: { a: 1, r: 1 }
 	},
 	title: {
-		font: title-font,
-		fontColor: { a: 1, b: 1, g: 1, r: 1 }
+		font: large-font,
+		fontColor: { a: 1, b: 0.8, g: 0.8, r: 0.8 }
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
 	default: {
-		font: button-font,
-		fontColorSelected: { a: 1, b: 1, g: 1, r: 1 },
-		fontColorUnselected: { a: 1, b: 1, g: 1, r: 1 },
-		selection: default-select-selection
-	},
-	dimmed: {
-		font: default-font,
+		font: large-font,
 		fontColorSelected: { a: 1, b: 1, g: 1, r: 1 },
 		fontColorUnselected: { a: 1, b: 1, g: 1, r: 1 },
 		selection: selection,
-		background: dialogDim
+		background: button_base_invert
+	},
+	dimmed: {
+		font: large-font,
+		fontColorSelected: { a: 1, b: 1, g: 1, r: 1 },
+		fontColorUnselected: { a: 1, b: 1, g: 1, r: 1 },
+		selection: selection,
+		background: button_base_invert
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle: {
 	default: {
-		checkboxOn: check-on,
-		checkboxOff: check-off,
-		font: default-font,
+		checkboxOn: button_selected,
+		checkboxOff: button_pressed,
+		font: large-font,
 		fontColor: { a: 1, b: 1, g: 1, r: 1 }
 	}
 },
@@ -139,13 +129,14 @@ com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle: {
 	default: { plus: tree-plus, minus: tree-minus, selection: default-select-selection }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
-	default-horizontal: { background: default-scroll, knob: slider }
+	default-vertical: { background: button_pressed, knob: button_base },
+	default-horizontal: { background: button_pressed, knob: button_base }
 },
 com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle: {
 	default: {
-		font: default-font,
+		font: large-font,
 		fontColor: { a: 1, b: 1, g: 1, r: 1 },
-		background: default-select,
+		background: button_pressed,
 		scrollStyle: default,
 		listStyle: default
 	}

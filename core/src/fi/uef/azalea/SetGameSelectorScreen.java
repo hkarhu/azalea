@@ -17,15 +17,15 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 
 	private Array<CardSet> selectedSets;
 
-	private int cardAmount = 0;
+	private int cardAmount = 2;
 
 	public SetGameSelectorScreen() {
 
 		super();
-		
+
 		selectedSets = new Array<CardSet>();
 
-		final Dialog cardAmountDialog = new Dialog("Valitse parien määrä", Statics.SKIN); //TODO
+		final Dialog cardAmountDialog = new Dialog("Valitse parien määrä", Statics.SKIN, "default"); //TODO
 
 		TextButton dialogOK = new TextButton("Pelaa", Statics.SKIN); //TODO
 		dialogOK.addListener(new ChangeListener(){
@@ -44,8 +44,8 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 			}
 		});
 
-		cardAmountDialog.getButtonTable().add(dialogCancel).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.left).growX();
-		cardAmountDialog.getButtonTable().add(dialogOK).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).growX();
+		cardAmountDialog.getButtonTable().add(dialogCancel).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.left).expandX();
+		cardAmountDialog.getButtonTable().add(dialogOK).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expandX();
 
 		doneButton = new TextButton("Valitse", Statics.SKIN); //TODO
 		doneButton.setDisabled(true);
@@ -53,24 +53,34 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 		doneButton.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-					cardAmountDialog.getContentTable().clear();
-					int maxNumCards = 2;
-					for(CardSet s : selectedSets){
-						maxNumCards += s.getCards().size;
+				int maxNumCards = 2;
+				for(CardSet s : selectedSets){
+					maxNumCards += s.getCards().size;
+				}
+				
+				if(maxNumCards == 2){
+					cardAmount = 2;
+					Azalea.changeState(AppState.game);
+					return;
+				}
+
+				cardAmountDialog.getContentTable().clear();
+
+				int maxCards = (maxNumCards > 32 ? 32 : maxNumCards);
+				final Slider amountSlider = new Slider(2, maxCards, 1, false, Statics.SKIN);
+				amountSlider.setValue((cardAmount > maxCards ? maxCards : cardAmount));
+				final Label amountLabel = new Label("Kortteja: " + cardAmount, Statics.SKIN); //TODO
+				amountSlider.addListener(new ChangeListener() {
+					@Override
+					public void changed(ChangeEvent event, Actor actor) {
+						cardAmount = (int) amountSlider.getValue();
+						amountLabel.setText("Kortteja: " + cardAmount); //TODO
 					}
-					final Slider amountSlider = new Slider(2, (maxNumCards > 32 ? 32 : maxNumCards), 1, false, Statics.SKIN);
-					final Label amountLabel = new Label("Kortteja: " + cardAmount, Statics.SKIN); //TODO
-					amountSlider.addListener(new ChangeListener() {
-						@Override
-						public void changed(ChangeEvent event, Actor actor) {
-							cardAmount = (int) amountSlider.getValue();
-							amountLabel.setText("Kortteja: " + cardAmount); //TODO
-						}
-					});
-					cardAmountDialog.getContentTable().add(amountLabel).align(Align.center).expand();
-					cardAmountDialog.getContentTable().row();
-					cardAmountDialog.getContentTable().add(amountSlider).size(700, 80).expandX();
-					cardAmountDialog.show(stage);
+				});
+				cardAmountDialog.getContentTable().add(amountLabel).align(Align.center).expand();
+				cardAmountDialog.getContentTable().row();
+				cardAmountDialog.getContentTable().add(amountSlider).size(Gdx.graphics.getWidth()*0.6f, Gdx.graphics.getHeight()*0.3f).expandX();
+				cardAmountDialog.show(stage);
 			}
 		});
 
@@ -89,9 +99,10 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 	protected void reloadCardSets() {
 
 		super.reloadCardSets();
-		
+
 		//Add listeners and prepare table
 		for(final CardSet s : cardSets){
+			if(s.getCards().size < 2) continue; //If the set is too small for play, skip it
 			s.addListener(new ChangeListener() {
 				@Override
 				public void changed(ChangeEvent event, Actor actor) {
@@ -113,10 +124,6 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 			cardListTable.row();
 		}
 
-	}
-
-	public CardSet getSelectedSet(){
-		return selectedSets.first();
 	}
 
 	public Array<CardImageData> getCards() {

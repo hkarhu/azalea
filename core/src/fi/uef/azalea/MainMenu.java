@@ -6,12 +6,10 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
-import com.sun.glass.ui.Application;
 
 public class MainMenu extends Screen {
 	
@@ -25,13 +23,17 @@ public class MainMenu extends Screen {
 
 		stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 		Image background = new Image(Statics.MENU);
+		background.setBounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Table t = new Table(Statics.SKIN);
 		quit = new TextButton("Lopeta", Statics.SKIN);
 		quit.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.1f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
+		
 		edit = new TextButton("Muokkaa kortteja", Statics.SKIN);
-		edit.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.22f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
-		start = new TextButton("Pelaa muistipeliä", Statics.SKIN);
-		start.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.34f, Gdx.graphics.getWidth()*0.75f, Gdx.graphics.getHeight()*0.1f);
+		edit.setBounds(Gdx.graphics.getWidth()*0.125f, Gdx.graphics.getHeight()*0.22f, Gdx.graphics.getWidth()*0.37f, Gdx.graphics.getHeight()*0.3f);
+		
+		start = new TextButton("Pelaa", Statics.SKIN);
+		start.setBounds(Gdx.graphics.getWidth()*0.5f, Gdx.graphics.getHeight()*0.22f, Gdx.graphics.getWidth()*0.37f, Gdx.graphics.getHeight()*0.3f);
+		
 		t.addActor(quit);
 		t.addActor(start);
 		t.addActor(edit);

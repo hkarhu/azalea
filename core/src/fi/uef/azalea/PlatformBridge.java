@@ -7,8 +7,10 @@ public interface PlatformBridge {
 	//public enum Platform { ANDROID, DESKTOP }; 
 	//private final Platform currentPlatform;
 
-	public void doImageSelect(CardImageData cid);
-	public void doImageCapture(CardImageData cid);
+	public void doImageSelect();
+	public void doImageCapture();
 	public FileHandle getImagePath();
+	public boolean imageCaptureSupported();
+	public void interrupt();
 	
 }

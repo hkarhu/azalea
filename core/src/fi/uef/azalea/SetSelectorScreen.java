@@ -3,12 +3,16 @@ package fi.uef.azalea;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -28,10 +32,14 @@ public abstract class SetSelectorScreen extends Screen {
 	public SetSelectorScreen() {
 	
 		stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+		stage.addActor(new Image(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG))));
+		
 		
 		if(Statics.DEBUG) stage.setDebugAll(true);
 
 		cardListTable = new Table();
+		cardListTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
+		
 		cardSetScrollPane = new ScrollPane(cardListTable);
 		cardSetScrollPane.setBounds(Gdx.graphics.getWidth()*0.05f, Gdx.graphics.getHeight()*0.05f, Gdx.graphics.getWidth()*0.9f, Gdx.graphics.getHeight()*0.85f);
 		cardSetScrollPane.setScrollingDisabled(true, false);

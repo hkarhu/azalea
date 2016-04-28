@@ -2,14 +2,12 @@ package fi.uef.azalea;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.CheckBox;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -19,8 +17,6 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
-
-import fi.uef.azalea.editor.LabelEditorActor;
 
 public class CardSet extends Table {
 	
@@ -38,7 +34,8 @@ public class CardSet extends Table {
 	private Drawable labelDrawableFront;
 	
 	private boolean selected = false;
-		
+	private final TextButton selectButton;
+	
 	public CardSet(FileHandle dataFolder) {
 		
 		this.dataFolder = dataFolder;
@@ -47,18 +44,13 @@ public class CardSet extends Table {
 		labelTextureFront = new Pixmap(512, 128, Format.RGBA4444);
 		cards = new Array<CardImageData>();
 		
-		final TextButton selectButton = new TextButton("Valitse", Statics.SKIN, "toggle"); //TODO
+		selectButton = new TextButton("Valitse", Statics.SKIN, "toggle"); //TODO
+		
 		selectButton.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				selected = !selected;
-				if(selected){
-					selectButton.setText("Valittu");
-					selectButton.setChecked(true);
-				} else {
-					selectButton.setText("Valitse"); //TODO
-					selectButton.setChecked(false);
-				}
+				CardSet.this.selected = !CardSet.this.selected;
+				selectButton.setText((selected ? "Valittu" : "Valitse"));
 			}
 		});
 		
@@ -85,6 +77,7 @@ public class CardSet extends Table {
 	}
 	
 	public void saveData(){
+		if(!dataFolder.exists()) dataFolder.mkdirs();
 		CardSetData cardSet = new CardSetData();
 		cardSet.title = this.title;
 		cardSet.cards = this.cards;
@@ -209,6 +202,8 @@ public class CardSet extends Table {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+		selectButton.setChecked(selected);
+		selectButton.setText((selected ? "Valittu" : "Valitse"));
 	}
 
 	public void addCard(CardImageData newCard) {

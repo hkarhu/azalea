@@ -51,7 +51,6 @@ public class SetEditSelectorScreen extends SetSelectorScreen {
 			public void changed(ChangeEvent event, Actor actor) {
 				FileHandle targetFile = Gdx.files.local("sets/" + System.nanoTime());
 				if(!targetFile.exists()) {
-					targetFile.mkdirs();
 					selectedSet = new CardSet(targetFile);
 					Azalea.changeState(AppState.edit);
 				} else {
@@ -76,7 +75,7 @@ public class SetEditSelectorScreen extends SetSelectorScreen {
 	protected void reloadCardSets() {
 		super.reloadCardSets();
 		
-		cardListTable.add(newCardSetCreator).pad(5).growX();
+		cardListTable.add(newCardSetCreator).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.1f).pad(5).align(Align.center);
 		cardListTable.row();
 		
 		//Add listeners and prepare table
@@ -86,7 +85,6 @@ public class SetEditSelectorScreen extends SetSelectorScreen {
 				public void changed(ChangeEvent event, Actor actor) {
 					if(selectedSet != null) selectedSet.setSelected(false);
 					selectedSet = null;
-					
 					if(s.isSelected()) selectedSet = s;
 					
 					if(selectedSet != null){
@@ -102,7 +100,7 @@ public class SetEditSelectorScreen extends SetSelectorScreen {
 					}
 				}
 			});
-			cardListTable.add(s).pad(5).growX();
+			cardListTable.add(s).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.1f).pad(5).align(Align.center);
 			cardListTable.row();
 		}
 
