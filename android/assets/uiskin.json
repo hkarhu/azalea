@@ -9,6 +9,7 @@ com.badlogic.gdx.graphics.Color: {
 },
 com.badlogic.gdx.graphics.g2d.BitmapFont: {
 	large-font: { file: large-font.fnt },
+	medium-font: { file: medium-font.fnt },
 	default-font: { file: default.fnt }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Skin$TintedDrawable: {
@@ -61,7 +62,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle: {
 	},
 	dialog: {
 		background: button_base_invert,
-		titleFont: large-font,
+		titleFont: medium-font,
 		titleFontColor: { a: 1, b: 1, g: 1, r: 1 }
 	}
 },
@@ -90,7 +91,11 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	},
 	default: {
 		font: large-font,
-		fontColor: { a: 1, b: 1, g: 1, r: 1 }
+		fontColor: { a: 1 }
+	},
+	dialog: {
+		font: medium-font,
+		fontColor: { a: 1, b: 0.7, g: 0.7, r: 0.7 }
 	},
 	error: {
 		font: large-font,
@@ -98,7 +103,7 @@ com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle: {
 	},
 	title: {
 		font: large-font,
-		fontColor: { a: 1, b: 0.8, g: 0.8, r: 0.8 }
+		fontColor: { a: 1, b: 1, g: 1, r: 1 }
 	}
 },
 com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle: {
@@ -129,8 +134,8 @@ com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle: {
 	default: { plus: tree-plus, minus: tree-minus, selection: default-select-selection }
 },
 com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle: {
-	default-vertical: { background: button_pressed, knob: button_base },
-	default-horizontal: { background: button_pressed, knob: button_base }
+	default-vertical: { background: button_pressed, knob: button_selected },
+	default-horizontal: { background: button_pressed, knob: button_selected }
 },
 com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle: {
 	default: {

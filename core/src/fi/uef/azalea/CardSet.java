@@ -35,14 +35,17 @@ public class CardSet extends Table {
 	
 	private boolean selected = false;
 	private final TextButton selectButton;
+	private final Label cardAmountLabel;
 	
 	public CardSet(FileHandle dataFolder) {
 		
 		this.dataFolder = dataFolder;
 		
-		labelTextureBack = new Pixmap(1024, 128, Format.RGBA8888);
-		labelTextureFront = new Pixmap(512, 128, Format.RGBA4444);
+		labelTextureBack = new Pixmap(1024, 256, Format.RGBA8888);
+		labelTextureFront = new Pixmap(1024, 256, Format.RGBA4444);
 		cards = new Array<CardImageData>();
+		
+		labelDrawableBack = new TextureRegionDrawable(Statics.TEXREGION_TITLE_EMPTY);
 		
 		selectButton = new TextButton("Valitse", Statics.SKIN, "toggle"); //TODO
 		
@@ -54,7 +57,7 @@ public class CardSet extends Table {
 			}
 		});
 		
-		Label cardAmountLabel = new Label(amountString, Statics.SKIN);
+		cardAmountLabel = new Label(amountString, Statics.SKIN);
 		
 		this.add(selectButton).pad(8).size(150, 100).align(Align.left);
 		this.add(new Label(title, Statics.SKIN)).align(Align.left).expand().fill(); //TODO
@@ -70,10 +73,11 @@ public class CardSet extends Table {
 		this.labelTextureBack = PixmapIO.readCIM(dataFolder.child("label_back.cim"));
 		
 		this.labelDrawableFront = new TextureRegionDrawable(new TextureRegion(new Texture(labelTextureFront)));
-		this.labelDrawableBack = new TextureRegionDrawable(new TextureRegion(new Texture(labelTextureBack)));
+		//this.labelDrawableBack = new TextureRegionDrawable(new TextureRegion(new Texture(labelTextureBack)));
 		
 		this.cards = cardSetData.cards;
-		amountString = cards.size + "korttia";
+		amountString = cards.size + " korttia";
+		cardAmountLabel.setText(amountString);
 	}
 	
 	public void saveData(){
@@ -214,7 +218,7 @@ public class CardSet extends Table {
 	@Override
 	protected void drawBackground (Batch batch, float parentAlpha, float x, float y) {
 		
-		if(selected) batch.setColor(1,1,1,1); else batch.setColor(0.5f,0.5f,0.5f,1);
+		if(selected) batch.setColor(1,1,1,1); else batch.setColor(0.8f,0.8f,0.8f,1);
 		if(labelDrawableBack != null) labelDrawableBack.draw(batch, x, y, getWidth(), getHeight());
 		
 		//Label
@@ -224,8 +228,8 @@ public class CardSet extends Table {
 			float yShift = (getHeight()-(labelDrawableFront.getMinHeight()*sizeScaler))*0.5f;
 			float xShift = 200;
 			
-			batch.setColor(0,0,0,0.8f);
-			labelDrawableFront.draw(batch, x+xShift+shadowShift, y+yShift-shadowShift, labelDrawableFront.getMinWidth()*sizeScaler, labelDrawableFront.getMinHeight()*sizeScaler);
+			//batch.setColor(0,0,0,0.8f);
+			//labelDrawableFront.draw(batch, x+xShift+shadowShift, y+yShift-shadowShift, labelDrawableFront.getMinWidth()*sizeScaler, labelDrawableFront.getMinHeight()*sizeScaler);
 			batch.setColor(1,1,1,1);
 			labelDrawableFront.draw(batch, x+xShift, y+yShift, labelDrawableFront.getMinWidth()*sizeScaler, labelDrawableFront.getMinHeight()*sizeScaler);
 		}

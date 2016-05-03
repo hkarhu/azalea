@@ -18,8 +18,8 @@ public class Statics {
 	public static final int DEFAULT_HEIGHT = 800;
 	public static final int CARD_PIXMAP_SIZE = 300;
 	
-	public static final float BRUSH_RADIUS = 1.5f;
-	public static final float ERASER_RADIUS = 6.0f;
+	public static final float BRUSH_RADIUS = 4f;
+	public static final float ERASER_RADIUS = 8f;
 	
 	public static final String CARD_IMAGE_CACHE = "card_cache";
 	
@@ -50,6 +50,7 @@ public class Statics {
 	
 	public static Texture TEX_LISTBG = new Texture(Gdx.files.internal("list_background.png"));
 	public static Texture TEX_MENUBG = new Texture(Gdx.files.internal("texture_leather.png"));
+	public static Texture TEX_TITLEBG = new Texture(Gdx.files.internal("texture_paper.png"));
 	
 	public static Texture MENU = new Texture(Gdx.files.internal("menu.png"));
 	public static Texture CORRECT = new Texture(Gdx.files.internal("right.png"));

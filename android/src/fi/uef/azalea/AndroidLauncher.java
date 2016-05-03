@@ -1,21 +1,12 @@
 package fi.uef.azalea;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
 import com.badlogic.gdx.files.FileHandle;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 
 public class AndroidLauncher extends AndroidApplication {
 	
@@ -46,6 +37,8 @@ public class AndroidLauncher extends AndroidApplication {
 			} else if (requestCode == AndroidPlatformBridge.CAPTURE_IMAGE_CODE) {
 				return;
 			}
+		} else {
+			platform.setPath(null);
 		}
         super.onActivityResult(requestCode, resultCode, data);
 	}

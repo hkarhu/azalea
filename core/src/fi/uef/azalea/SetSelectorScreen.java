@@ -25,20 +25,21 @@ public abstract class SetSelectorScreen extends Screen {
 	protected Stage stage;
 	protected ScrollPane cardSetScrollPane;
 	protected static Array<CardSet> cardSets = new Array<CardSet>();
-
+	protected Table content;
 	protected TextButton doneButton;
 	protected TextButton cancelButton;
 
 	public SetSelectorScreen() {
 	
 		stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-		stage.addActor(new Image(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG))));
-		
 		
 		if(Statics.DEBUG) stage.setDebugAll(true);
 
+		content = new Table();
+		content.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG)));
+		
 		cardListTable = new Table();
-		cardListTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
+		cardListTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_TITLEBG)));
 		
 		cardSetScrollPane = new ScrollPane(cardListTable);
 		cardSetScrollPane.setBounds(Gdx.graphics.getWidth()*0.05f, Gdx.graphics.getHeight()*0.05f, Gdx.graphics.getWidth()*0.9f, Gdx.graphics.getHeight()*0.85f);

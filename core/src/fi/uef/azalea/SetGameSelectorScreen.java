@@ -25,7 +25,7 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 
 		selectedSets = new Array<CardSet>();
 
-		final Dialog cardAmountDialog = new Dialog("Valitse parien määrä", Statics.SKIN, "default"); //TODO
+		final Dialog cardAmountDialog = new Dialog("Valitse parien määrä", Statics.SKIN, "dialog"); //TODO
 
 		TextButton dialogOK = new TextButton("Pelaa", Statics.SKIN); //TODO
 		dialogOK.addListener(new ChangeListener(){
@@ -53,13 +53,13 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 		doneButton.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				int maxNumCards = 2;
+				int maxNumCards = 0;
 				for(CardSet s : selectedSets){
 					maxNumCards += s.getCards().size;
 				}
 				
-				if(maxNumCards == 2){
-					cardAmount = 2;
+				if(maxNumCards < 5){
+					cardAmount = maxNumCards;
 					Azalea.changeState(AppState.game);
 					return;
 				}
@@ -69,15 +69,15 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 				int maxCards = (maxNumCards > 32 ? 32 : maxNumCards);
 				final Slider amountSlider = new Slider(2, maxCards, 1, false, Statics.SKIN);
 				amountSlider.setValue((cardAmount > maxCards ? maxCards : cardAmount));
-				final Label amountLabel = new Label("Kortteja: " + cardAmount, Statics.SKIN); //TODO
+				final Label amountLabel = new Label("Pareja: " + cardAmount, Statics.SKIN, "title"); //TODO
 				amountSlider.addListener(new ChangeListener() {
 					@Override
 					public void changed(ChangeEvent event, Actor actor) {
 						cardAmount = (int) amountSlider.getValue();
-						amountLabel.setText("Kortteja: " + cardAmount); //TODO
+						amountLabel.setText("Pareja: " + cardAmount); //TODO
 					}
 				});
-				cardAmountDialog.getContentTable().add(amountLabel).align(Align.center).expand();
+				cardAmountDialog.getContentTable().add(amountLabel).align(Align.center).pad(20).expand();
 				cardAmountDialog.getContentTable().row();
 				cardAmountDialog.getContentTable().add(amountSlider).size(Gdx.graphics.getWidth()*0.6f, Gdx.graphics.getHeight()*0.3f).expandX();
 				cardAmountDialog.show(stage);
@@ -86,9 +86,9 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 
 		Table content = new Table();
 		content.setFillParent(true);
-		content.add(new Label("Valitse pelissä käytettävät korttipakat", Statics.SKIN)).colspan(2).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.center); //TODO
+		content.add(new Label("Valitse pelissä käytettävät korttipakat", Statics.SKIN, "title")).colspan(2).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.center); //TODO
 		content.row();
-		content.add(cardSetScrollPane).colspan(2).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).fill().expand();
+		content.add(cardSetScrollPane).colspan(2).fill().expand();
 		content.row();
 		content.add(cancelButton).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.left).growX();
 		content.add(doneButton).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).growX();
@@ -120,7 +120,7 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 					}
 				}
 			});
-			cardListTable.add(s).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).growX();
+			cardListTable.add(s).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.1f).pad(5).align(Align.center);
 			cardListTable.row();
 		}
 

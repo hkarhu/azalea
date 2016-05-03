@@ -17,9 +17,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 
-import fi.uef.azalea.Statics;
-import fi.uef.azalea.Azalea.AppState;
 import fi.uef.azalea.Azalea;
+import fi.uef.azalea.Azalea.AppState;
 import fi.uef.azalea.CardImageData;
 import fi.uef.azalea.Screen;
 import fi.uef.azalea.Statics;
@@ -294,8 +293,8 @@ public class GameScreen extends Screen implements InputProcessor {
 					openedCards.get(0).lerpTowards(screenShowPosition_L);
 				}
 				
-				openedCards.get(1).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler;
-				openedCards.get(0).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler;
+				openedCards.get(1).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler*0.75f;
+				openedCards.get(0).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler*0.75f;
 				break;
 			case end:
 				decalBatch.add(winDecal);
@@ -407,7 +406,7 @@ public class GameScreen extends Screen implements InputProcessor {
 						float pWidth = tr.getRegionWidth();
 						float pHeight = tr.getRegionHeight();
 						float s = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) - Statics.screenMargin*0.5f;
-						if(pWidth > pHeight){
+						if(pWidth < pHeight){
 							prizeDecal.setWidth(s);
 							prizeDecal.setHeight(s*(pHeight/pWidth));
 						} else {

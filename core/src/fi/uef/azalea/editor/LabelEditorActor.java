@@ -16,7 +16,7 @@ public class LabelEditorActor extends Actor {
 	public boolean editing = false;
 	private Texture labelEditTexture;
 	private Pixmap labelTexturePixmap;
-	private boolean edit = false;
+	private boolean edit = true;
 	private boolean erase = false;
 	private boolean newTexture = true;
 
@@ -47,7 +47,7 @@ public class LabelEditorActor extends Actor {
 					labelTexturePixmap.setColor(0,0,0,0);
 				} else {
 					Pixmap.setBlending(Blending.SourceOver);
-					labelTexturePixmap.setColor(1,1,1,0.7f);
+					labelTexturePixmap.setColor(0,0,0,0.7f);
 				}
 
 				x = trX(x);
@@ -78,6 +78,16 @@ public class LabelEditorActor extends Actor {
 		return ((getHeight()-y)/getHeight())*labelTexturePixmap.getHeight();
 	}
 	
+	private boolean isTextureEmpty(){
+		
+		for(int y=0; y < labelTexturePixmap.getHeight(); y += Statics.BRUSH_RADIUS)
+		for(int x=0; x < labelTexturePixmap.getWidth(); x += Statics.BRUSH_RADIUS){
+			if(labelTexturePixmap.getPixel(x, y) > 0) return false;
+		}
+		
+		return true;
+	}
+	
 	public void setEdit(boolean edit){
 		this.edit = edit;
 	}
@@ -100,14 +110,18 @@ public class LabelEditorActor extends Actor {
 	
 	@Override
 	public void draw(Batch batch, float alpha){
-		if(newTexture) batch.draw(Statics.TEX_TITLE_HELP, getX(), getY());
+		if(newTexture) batch.draw(Statics.TEX_TITLE_HELP, getX()+getWidth()*0.5f, getY());
 		batch.draw(labelEditTexture, getX(), getY(), getWidth(), getHeight());
 	}
+	
 
-	public void setLabel(Pixmap p) {
-		labelTexturePixmap.drawPixmap(p, 0, 0, p.getWidth(), p.getHeight(), 0, 0, labelEditTexture.getWidth(), labelEditTexture.getHeight());
+	public void setEditableLabel(Pixmap p) {
+		System.out.println("Editable label set " + p);
+		Pixmap.setBlending(Blending.None);
+		labelTexturePixmap.setColor(0,0,0,1);
+		labelTexturePixmap.drawPixmap(p, 0, 0, p.getWidth(), p.getHeight(), 0, 0, labelTexturePixmap.getWidth(), labelTexturePixmap.getHeight());
 		labelEditTexture.draw(labelTexturePixmap, 0,0);
-		newTexture = false;
+		newTexture = isTextureEmpty();
 	}
 
 }

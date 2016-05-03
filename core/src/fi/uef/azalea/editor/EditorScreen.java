@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -32,7 +33,7 @@ public class EditorScreen extends Screen {
 	private Button newCardCreator;
 	private Stage editCardStage;
 	
-	private enum EditMode {edit_set, edit_card, get_image}
+	private enum EditMode {edit_set, edit_card, edit_label, get_image}
 	private EditMode currentMode = EditMode.edit_set;
 		
 	private CardSet editableCardSet;
@@ -47,7 +48,7 @@ public class EditorScreen extends Screen {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				newCardDialog.hide();
-				Azalea.platform.doImageSelect();
+				Azalea.platform.doImageCapture();
 				setMode(EditMode.get_image);
 			}
 		});
@@ -57,7 +58,7 @@ public class EditorScreen extends Screen {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				newCardDialog.hide();
-				Azalea.platform.doImageCapture();
+				Azalea.platform.doImageSelect();
 				setMode(EditMode.get_image);
 			}
 		});
@@ -116,17 +117,27 @@ public class EditorScreen extends Screen {
 		bg.add(buttonDraw);
 		bg.add(buttonErase);
 		bg.setMaxCheckCount(1);
-		
+		buttonErase.setProgrammaticChangeEvents(false);
 		buttonErase.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				labelEditor.setErase(true);
+				buttonErase.setChecked(!buttonErase.isChecked());
+				if(buttonErase.isChecked()){
+					labelEditor.setErase(true);
+					buttonDraw.setChecked(false);
+				}
 			}
 		});
+		
+		buttonDraw.setProgrammaticChangeEvents(false);
 		buttonDraw.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				labelEditor.setErase(false);
+				buttonDraw.setChecked(!buttonDraw.isChecked());
+				if(buttonDraw.isChecked()){
+					labelEditor.setErase(false);
+					buttonErase.setChecked(false);
+				}
 			}
 		});
 		
@@ -148,8 +159,10 @@ public class EditorScreen extends Screen {
 		Table editTitleTable = new Table();
 		editTitleTable.add(labelEditor).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.2f).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.center).expandX();
 		editTitleTable.add(editTitleToolsTable).align(Align.left).expandX();
+		editTitleTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
 		
 		Table mainEditContent = new Table();
+		mainEditContent.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG)));
 		mainEditContent.setFillParent(true);
 		mainEditContent.add(editTitleTable).colspan(2).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).height(Gdx.graphics.getWidth()*0.2f).align(Align.left).growX();
 		mainEditContent.row();
@@ -164,7 +177,7 @@ public class EditorScreen extends Screen {
 
 	public void setEditableSet(CardSet editableSet){
 		this.editableCardSet = editableSet;
-		this.labelEditor.setLabel(editableSet.getLabelFrontPixmap());
+		this.labelEditor.setEditableLabel(editableCardSet.getLabelFrontPixmap());
 	}
 	
 	private void resetCards(){
@@ -189,7 +202,6 @@ public class EditorScreen extends Screen {
 	public void init() {
 		resetCards();
 		this.ready = true;
-		labelEditor.clearTexture();
 		setMode(EditMode.edit_set);
 	}
 
@@ -214,6 +226,7 @@ public class EditorScreen extends Screen {
 		
 		switch (currentMode) {
 		case get_image:
+		case edit_label:
 		case edit_set:
 			editSetStage.act(Gdx.graphics.getDeltaTime());
 			editSetStage.draw();
@@ -241,7 +254,7 @@ public class EditorScreen extends Screen {
 
 	private void getImage(){
 		FileHandle targetPath = Azalea.platform.getImagePath();
-		if(targetPath.exists()){
+		if(targetPath != null && targetPath.exists()){
 			editableCard = new CardImageData();
 			editableCard.setSource(targetPath);
 			editableCard.generateCardTexture();

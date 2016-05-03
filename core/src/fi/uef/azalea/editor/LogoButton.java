@@ -4,8 +4,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-
-import fi.uef.azalea.Statics;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 
 public class LogoButton extends Button {
 

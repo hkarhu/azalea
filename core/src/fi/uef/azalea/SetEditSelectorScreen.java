@@ -59,11 +59,10 @@ public class SetEditSelectorScreen extends SetSelectorScreen {
 			}
 		});
 
-		Table content = new Table();
 		content.setFillParent(true);
-		content.add(new Label("Muokkaa korttipakkoja", Statics.SKIN)).height(Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).colspan(3).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.center);
+		content.add(new Label("Muokkaa korttipakkoja", Statics.SKIN, "title")).height(Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).colspan(3).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.center);
 		content.row();
-		content.add(cardSetScrollPane).colspan(3).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).fill().expand();
+		content.add(cardSetScrollPane).colspan(3).fill().expand();
 		content.row();
 		content.add(cancelButton).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.left).growX();
 		content.add(deleteButton).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).growX();
@@ -75,7 +74,7 @@ public class SetEditSelectorScreen extends SetSelectorScreen {
 	protected void reloadCardSets() {
 		super.reloadCardSets();
 		
-		cardListTable.add(newCardSetCreator).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.1f).pad(5).align(Align.center);
+		cardListTable.add(newCardSetCreator).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.1f).pad(5).padBottom(30).align(Align.center);
 		cardListTable.row();
 		
 		//Add listeners and prepare table

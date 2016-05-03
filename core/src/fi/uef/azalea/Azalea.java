@@ -38,6 +38,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 		//spriteBatch = new SpriteBatch();
 
 		Statics.SKIN.getFont("large-font").getData().setScale(Gdx.graphics.getWidth()*0.0005f);
+		Statics.SKIN.getFont("medium-font").getData().setScale(Gdx.graphics.getWidth()*0.00025f);
 		
 		//Screens need to be created here because constructors might need to access the render threads
 		mainMenu = new MainMenu();
