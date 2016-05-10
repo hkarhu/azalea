@@ -39,7 +39,6 @@ public abstract class SetSelectorScreen extends Screen {
 		content.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG)));
 		
 		cardListTable = new Table();
-		cardListTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_TITLEBG)));
 		
 		cardSetScrollPane = new ScrollPane(cardListTable);
 		cardSetScrollPane.setBounds(Gdx.graphics.getWidth()*0.05f, Gdx.graphics.getHeight()*0.05f, Gdx.graphics.getWidth()*0.9f, Gdx.graphics.getHeight()*0.85f);

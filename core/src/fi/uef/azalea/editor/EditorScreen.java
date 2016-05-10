@@ -2,6 +2,7 @@ package fi.uef.azalea.editor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -9,12 +10,14 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
@@ -31,15 +34,33 @@ public class EditorScreen extends Screen {
 	private Table cardTable;
 	private LabelEditorActor labelEditor;
 	private Button newCardCreator;
+	private Button deleteButton;
 	private Stage editCardStage;
 	
 	private enum EditMode {edit_set, edit_card, edit_label, get_image}
 	private EditMode currentMode = EditMode.edit_set;
+	
+	private final Dialog cardAddFailDialog;
+	
+	
 		
 	private CardSet editableCardSet;
 	private CardImageData editableCard;
 	
 	public EditorScreen() {
+		
+		cardAddFailDialog = new Dialog("Kuva oli jo pakassa!", Statics.SKIN, "default"); //TODO
+		Label failLabel = new Label("Et voi lisätä samaa kuvaa kahta kertaa.\nMuutenhan pelistä tulisi ihan hassu.", Statics.SKIN, "medium-font", Color.WHITE);
+		TextButton failOKButton = new TextButton("Hups, anteeksi!", Statics.SKIN); //TODO
+		failOKButton.addListener(new ChangeListener(){
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				cardAddFailDialog.hide();
+			}
+		});
+		cardAddFailDialog.setSize(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getHeight()*0.5f);
+		cardAddFailDialog.getButtonTable().add(failOKButton);
+		cardAddFailDialog.getContentTable().add(failLabel);
 		
 		final Dialog newCardDialog = new Dialog("Haetaanko kuva kameralla vai laitteen muistista?", Statics.SKIN, "default"); //TODO
 		
@@ -65,13 +86,12 @@ public class EditorScreen extends Screen {
 		
 		newCardDialog.getButtonTable().add(storageButton);
 		newCardDialog.getButtonTable().add(cameraButton);
-
+		
 		newCardCreator = new Button(new TextureRegionDrawable(new TextureRegion(Statics.TEX_NEW_CARD_BUTTON_UP)),
 						 			new TextureRegionDrawable(new TextureRegion(Statics.TEX_NEW_CARD_BUTTON_DOWN)));
 		newCardCreator.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				labelEditor.clearTexture();
 				if(Azalea.platform.imageCaptureSupported()){
 					newCardDialog.show(editSetStage);
 				} else {
@@ -92,15 +112,35 @@ public class EditorScreen extends Screen {
 		//cardSetScrollPane.setupFadeScrollBars(1, 1);
 		cardScrollPane.setFadeScrollBars(false);
 		Button doneButton = new TextButton("Valmis", Statics.SKIN); //TODO
+
+		Button editLabelButton = new TextButton("Muokkaa otsikkoa", Statics.SKIN); //TODO
+		editLabelButton.addListener(new ChangeListener(){
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				
+			}
+		});
+		
+		deleteButton = new TextButton("Poista tämä pakka", Statics.SKIN); //TODO
+		deleteButton.addListener(new ChangeListener(){
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				if(editableCardSet != null){
+					editableCardSet.deleteData();
+					Azalea.changeState(AppState.select_edit);
+				}
+			}
+		});
 		//doneButton.setDisabled(true);
 		//doneButton.setVisible(false);
 		
 		doneButton.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
-				System.out.println("SAVE");
-				editableCardSet.updateLabelFront(labelEditor.getLabelPixmap());
-				editableCardSet.saveData();
+				if(editableCardSet.getCards().size > 0 || !labelEditor.isLabelEmpty()){
+					editableCardSet.updateLabelFront(labelEditor.getLabelPixmap());
+					editableCardSet.saveData();
+				}
 				Azalea.changeState(AppState.select_edit);
 			}
 		});
@@ -108,24 +148,20 @@ public class EditorScreen extends Screen {
 		TextureRegion eraseDrawable = new TextureRegion(Statics.TEX_ICON_ERASE);
 		TextureRegion drawDrawable = new TextureRegion(Statics.TEX_ICON_DRAW);
 		TextureRegion clearDrawable = new TextureRegion(Statics.TEX_ICON_CLEAR);
-		
-		final Button buttonErase = new LogoButton(eraseDrawable, Statics.SKIN);
-		final Button buttonDraw = new LogoButton(drawDrawable, Statics.SKIN);
+
+		final TextButton buttonErase = new TextButton("Kumita", Statics.SKIN, "toggle");
+		final TextButton buttonDraw = new TextButton("Piirrä", Statics.SKIN, "toggle");
+//		final Button buttonErase = new LogoButton(eraseDrawable, Statics.SKIN);
+//		final Button buttonDraw = new LogoButton(drawDrawable, Statics.SKIN);
 		final Button buttonClear = new LogoButton(clearDrawable, Statics.SKIN);
 		
-		ButtonGroup<Button> bg = new ButtonGroup<Button>();
-		bg.add(buttonDraw);
-		bg.add(buttonErase);
-		bg.setMaxCheckCount(1);
 		buttonErase.setProgrammaticChangeEvents(false);
 		buttonErase.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
+				labelEditor.setErase(true);
 				buttonErase.setChecked(!buttonErase.isChecked());
-				if(buttonErase.isChecked()){
-					labelEditor.setErase(true);
-					buttonDraw.setChecked(false);
-				}
+				buttonDraw.setChecked(false);
 			}
 		});
 		
@@ -133,11 +169,9 @@ public class EditorScreen extends Screen {
 		buttonDraw.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
+				labelEditor.setErase(false);
 				buttonDraw.setChecked(!buttonDraw.isChecked());
-				if(buttonDraw.isChecked()){
-					labelEditor.setErase(false);
-					buttonErase.setChecked(false);
-				}
+				buttonErase.setChecked(false);
 			}
 		});
 		
@@ -145,30 +179,37 @@ public class EditorScreen extends Screen {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				labelEditor.clearTexture();
-				buttonClear.setChecked(false); //TODO: bad practice, change button
+				buttonDraw.setChecked(false);
+				buttonErase.setChecked(false);
 			}
 		});
 		
 		Table editTitleToolsTable = new Table();
-		editTitleToolsTable.add(buttonErase).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
-		editTitleToolsTable.add(buttonClear).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
+		editTitleToolsTable.add(buttonDraw).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*0.75f*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
 		editTitleToolsTable.row();
-		editTitleToolsTable.add(buttonDraw).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
+		editTitleToolsTable.add(buttonErase).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*0.75f*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
+		editTitleToolsTable.row();
+		editTitleToolsTable.add(buttonClear).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*0.75f*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
+		
 		
 		labelEditor = new LabelEditorActor();
 		Table editTitleTable = new Table();
 		editTitleTable.add(labelEditor).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.2f).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.center).expandX();
 		editTitleTable.add(editTitleToolsTable).align(Align.left).expandX();
-		editTitleTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
+		//editTitleTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
 		
 		Table mainEditContent = new Table();
 		mainEditContent.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG)));
 		mainEditContent.setFillParent(true);
-		mainEditContent.add(editTitleTable).colspan(2).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).height(Gdx.graphics.getWidth()*0.2f).align(Align.left).growX();
+		mainEditContent.add(editTitleTable).colspan(2).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).height(Gdx.graphics.getWidth()*0.2f).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.left).growX();
 		mainEditContent.row();
+		//mainEditContent.add(editLabelButton).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth()*2, Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.center).growX();
+		
+		//mainEditContent.row();
 		mainEditContent.add(cardScrollPane).colspan(2).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).fill().expand();
 		mainEditContent.row();
-		mainEditContent.add(doneButton).colspan(2).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.center).growX();
+		mainEditContent.add(deleteButton).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth()*2, Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.center).growX();
+		mainEditContent.add(doneButton).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).growX();
 		editSetStage.addActor(mainEditContent);
 		
 		if(Statics.DEBUG) editSetStage.setDebugAll(true);
@@ -196,6 +237,13 @@ public class EditorScreen extends Screen {
 			});
 			cardTable.add(ec).size(0.234f*Gdx.graphics.getWidth(), 0.234f*Gdx.graphics.getWidth()).pad(32).align(Align.center);
 		}
+		if(!editableCardSet.hasSavedData()){
+			deleteButton.setVisible(false);
+			deleteButton.setDisabled(true);
+		} else {
+			deleteButton.setVisible(true);
+			deleteButton.setDisabled(false);
+		}
 	}
 	
 	@Override
@@ -207,14 +255,18 @@ public class EditorScreen extends Screen {
 
 	private void setMode(EditMode mode){
 		this.currentMode = mode;
-		switch (currentMode) {
+		if(mode == EditMode.edit_label){
+			labelEditor.setEdit(false);
+		} else {
+			labelEditor.setEdit(true);
+		}
+		switch (currentMode) {		
 		case edit_set:
 			Gdx.input.setInputProcessor(editSetStage);
 			break;
 		case edit_card:
 			Gdx.input.setInputProcessor(editCardStage);
 			break;
-
 		default:
 			break;
 		}
@@ -257,8 +309,12 @@ public class EditorScreen extends Screen {
 		if(targetPath != null && targetPath.exists()){
 			editableCard = new CardImageData();
 			editableCard.setSource(targetPath);
-			editableCard.generateCardTexture();
-			editableCardSet.addCard(editableCard);
+			if(editableCardSet.containsCard(editableCard)){
+				cardAddFailDialog.show(editSetStage);
+			} else {
+				editableCard.generateCardTexture();
+				editableCardSet.addCard(editableCard);
+			}
 		}
 		resetCards();
 		setMode(EditMode.edit_set);

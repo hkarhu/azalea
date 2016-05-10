@@ -83,7 +83,9 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 				cardAmountDialog.show(stage);
 			}
 		});
-
+		
+		//cardListTable.setBackground(null);
+		
 		Table content = new Table();
 		content.setFillParent(true);
 		content.add(new Label("Valitse pelissä käytettävät korttipakat", Statics.SKIN, "title")).colspan(2).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.center); //TODO
@@ -102,7 +104,7 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 
 		//Add listeners and prepare table
 		for(final CardSet s : cardSets){
-			if(s.getCards().size < 2) continue; //If the set is too small for play, skip it
+			//if(s.getCards().size < 2) continue; //If the set is too small for play, skip it
 			s.addListener(new ChangeListener() {
 				@Override
 				public void changed(ChangeEvent event, Actor actor) {

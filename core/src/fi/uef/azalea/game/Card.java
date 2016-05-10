@@ -32,7 +32,7 @@ public class Card {
 	public Card(int groupID, TextureRegion texture, Vector2 position) {
 		this.group = groupID;
 		this.cardFrontDecal = Decal.newDecal(texture, true);
-		this.cardBackDecal = Decal.newDecal(new TextureRegion(Statics.CARD_BACK), true);
+		this.cardBackDecal = Decal.newDecal(Statics.CARD_BACK, true);
 		dimensions.setPosition(position);
 
 		this.position = new Vector3(dimensions.x, dimensions.y, 0);
@@ -112,6 +112,10 @@ public class Card {
 		zoom_amount = 0;
 		cardFrontDecal.setPosition(position);
 		cardBackDecal.setPosition(position);
+	}
+
+	public void dispose() {
+		cardFrontDecal.getTextureRegion().getTexture().dispose();
 	}
 
 }

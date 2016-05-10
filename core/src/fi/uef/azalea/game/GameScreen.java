@@ -15,6 +15,11 @@ import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.Array;
 
 import fi.uef.azalea.Azalea;
@@ -55,6 +60,7 @@ public class GameScreen extends Screen implements InputProcessor {
 	private ResizeableOrthographicCamera camera;
 	
 	public GameScreen() {
+		
 		cardsInPlay = new Array<Card>();
 		openedCards = new Array<Card>();
 		cardImages = new HashMap<Integer, CardImageData>();
@@ -78,6 +84,7 @@ public class GameScreen extends Screen implements InputProcessor {
 		
 		winDecal = Decal.newDecal(new TextureRegion(Statics.TEX_WIN), true);
 		winDecal.setPosition(0, 0, 100);
+
 	}
 	
 	private void swapState(GameStates newState) {
@@ -168,8 +175,9 @@ public class GameScreen extends Screen implements InputProcessor {
 			cardSize = (Gdx.graphics.getHeight()-(gridHeight*Statics.cardMargin) - Statics.screenMargin)/(float)gridHeight;
 		}
 
+		float topMargin = Gdx.graphics.getHeight()*0.05f*0;
 		float xShift = (gridWidth-1)*(cardSize + Statics.cardMargin)*0.5f;
-		float yShift = (gridHeight-1)*(cardSize + Statics.cardMargin)*0.5f;
+		float yShift = (gridHeight-1)*(cardSize + Statics.cardMargin)*0.5f + topMargin;
 
 		//Make positions
 		Array<Vector2> positions = new Array<Vector2>();
@@ -347,11 +355,13 @@ public class GameScreen extends Screen implements InputProcessor {
 
 	@Override
 	public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+		
 		Vector3 tp3 = new Vector3(screenX, screenY, 1);
 		camera.unproject(tp3);
 			
 		if(transition > 0){
-			transition = 0; 
+			if(currentState == GameStates.show_success) return true; //If showing the prize image, don't accept input before image is fully shown 
+			transition = 0;
 		}
 
 		switch (currentState) {
@@ -360,9 +370,12 @@ public class GameScreen extends Screen implements InputProcessor {
 				break;
 				
 			case show_success:
+				for(Card c : openedCards){
+					c.dispose();
+				}
 				cardsInPlay.removeAll(openedCards, true);
 				openedCards.clear();
-				swapState(GameStates.hide);
+				if(cardsInPlay.size > 0) swapState(GameStates.hide); else swapState(GameStates.end);
 				break;
 				
 			case show_wrong: //Hasten cleaning up, go directly to hide
@@ -399,10 +412,10 @@ public class GameScreen extends Screen implements InputProcessor {
 					}
 					if(allSame){
 						CardImageData d = cardImages.get(lastCard.getGroup());
+						prizeDecal.getTextureRegion().getTexture().dispose();
 						TextureRegion tr = d.getFullImageTexture();
 						prizeDecal.setTextureRegion(tr);
 						prizeDecal.setScale(1);
-						//TODO: get prize scaling from previous code
 						float pWidth = tr.getRegionWidth();
 						float pHeight = tr.getRegionHeight();
 						float s = Math.min(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) - Statics.screenMargin*0.5f;
@@ -424,7 +437,7 @@ public class GameScreen extends Screen implements InputProcessor {
 				break;
 		}
 		
-		return false;
+		return true;
 
 	}
 	

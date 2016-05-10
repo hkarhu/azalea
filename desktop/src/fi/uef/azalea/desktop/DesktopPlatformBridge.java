@@ -1,4 +1,6 @@
 package fi.uef.azalea.desktop;
+import java.io.File;
+
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
@@ -18,13 +20,15 @@ public class DesktopPlatformBridge implements PlatformBridge {
 		this.targetJFrame = targetJframe;
 		fileChooser = new JFileChooser();
 		fileChooser.addChoosableFileFilter(new ImageFileFilter());
-		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);		
 	}
 
 	@Override
 	public void doImageSelect() {
 		if(fileChooser.showOpenDialog(targetJFrame) == JFileChooser.APPROVE_OPTION){
-			selectedImage = new FileHandle(fileChooser.getSelectedFile());
+			fileChooser.requestFocus();
+			File f = fileChooser.getSelectedFile();
+			selectedImage = new FileHandle(f);
 		} else {
 			selectedImage = null;
 		}

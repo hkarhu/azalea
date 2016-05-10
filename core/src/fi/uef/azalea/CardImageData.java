@@ -1,7 +1,5 @@
 package fi.uef.azalea;
 
-import java.util.HashMap;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -70,6 +68,7 @@ public class CardImageData implements Serializable {
 	public void write(Json json) {
 		System.out.println("serialize");
 		json.writeValue("sourceFile", sourceFile.path());
+		if(thumbFile == null) generateCardTexture();
 		json.writeValue("thumbFile", thumbFile.path());
 		System.out.println("write source file: " + sourceFile.path());
 		System.out.println("write thumbFile file: " + thumbFile.path());

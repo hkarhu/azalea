@@ -55,7 +55,7 @@ public class Statics {
 	public static Texture MENU = new Texture(Gdx.files.internal("menu.png"));
 	public static Texture CORRECT = new Texture(Gdx.files.internal("right.png"));
 	public static Texture WRONG = new Texture(Gdx.files.internal("wrong.png"));
-	public static Texture CARD_BACK = new Texture(Gdx.files.internal("card_back.png"));
+	
 	public static Texture PLAYGROUND_BACKGROUND = new Texture(Gdx.files.internal("gray_bg.png"));
 	public static Texture IMAGE_FULLVIEW_BACKGROUND = new Texture(Gdx.files.internal("gray_bg.png"));
 	public static Texture DARKEN_MASK = new Texture(Gdx.files.internal("darkenmask.png"));
@@ -63,6 +63,9 @@ public class Statics {
 	public static Texture TEX_TITLE_HELP = new Texture(Gdx.files.internal("title_help.png"));
 	
 	public static TextureRegion TEXREGION_TITLE_EMPTY = new TextureRegion(new Texture(Gdx.files.internal("deck_label_new.png")));
+	public static TextureRegion CARD_BACK = new TextureRegion(new Texture(Gdx.files.internal("card_back.png")));
+	
+	public static TextureRegion EXIT_TEX = new TextureRegion(new Texture(Gdx.files.internal("quit.png")));
 	
 	public static String STRING_EDIT_SET = "";
 	public static String STRING_SELECT_SET = "";
@@ -72,7 +75,6 @@ public class Statics {
 	public static String STRING_BACK_BUTTON = "";
 	
 	static {
-		
 		PLAYGROUND_BACKGROUND.setFilter(TextureFilter.Linear, TextureFilter.Linear);
 		PLAYGROUND_BACKGROUND.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 		DARKEN_MASK.setFilter(TextureFilter.Linear, TextureFilter.Linear);

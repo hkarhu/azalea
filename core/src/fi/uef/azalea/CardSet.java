@@ -2,6 +2,7 @@ package fi.uef.azalea;
 
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
@@ -179,7 +180,8 @@ public class CardSet extends Table {
 	*/
 
 	public void updateLabelFront(Pixmap labelPixmap) {
-		this.labelTextureFront.drawPixmap(labelPixmap, 0,0, labelPixmap.getWidth(), labelPixmap.getHeight(), 2, 2, 510, 126);
+		Pixmap.setBlending(Blending.None);
+		this.labelTextureFront.drawPixmap(labelPixmap, 0,0, labelPixmap.getWidth(), labelPixmap.getHeight(), 0, 0, labelTextureFront.getWidth(), labelTextureFront.getHeight());
 	}
 	
 	public Array<CardImageData> getCards(){
@@ -210,8 +212,15 @@ public class CardSet extends Table {
 		selectButton.setText((selected ? "Valittu" : "Valitse"));
 	}
 
+	public boolean containsCard(CardImageData target){
+		for(CardImageData c : cards){
+			if(c.getSourceFile().path().equals(target.getSourceFile().path())) return true;
+		}
+		return false;
+	}
+	
 	public void addCard(CardImageData newCard) {
-		this.cards.add(newCard);
+		this.cards.insert(0, newCard); //add first
 		amountString = cards.size + "korttia";
 	}
 		
@@ -242,6 +251,10 @@ public class CardSet extends Table {
 
 	public void removeCard(CardImageData c) {
 		cards.removeValue(c, true);
+	}
+
+	public boolean hasSavedData() {
+		return dataFolder.exists();
 	}
 
 }
