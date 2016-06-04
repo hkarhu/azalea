@@ -1,5 +1,6 @@
 package fi.uef.azalea.game;
 
+import java.lang.reflect.Executable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,25 +14,28 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.decals.CameraGroupStrategy;
 import com.badlogic.gdx.graphics.g3d.decals.Decal;
 import com.badlogic.gdx.graphics.g3d.decals.DecalBatch;
+import com.badlogic.gdx.maps.tiled.TiledMapTile.BlendMode;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener.ChangeEvent;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import fi.uef.azalea.Azalea;
 import fi.uef.azalea.Azalea.AppState;
 import fi.uef.azalea.CardImageData;
 import fi.uef.azalea.Screen;
+import fi.uef.azalea.SlowButton;
 import fi.uef.azalea.Statics;
 import fi.uef.azalea.camera.ResizeableOrthographicCamera;
 
 public class GameScreen extends Screen implements InputProcessor {
 
 	public static float cardSize = 0f;
+	
+	private Stage stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 	
 	private int guesses = 0;
 	private int max_tries = 0;
@@ -40,8 +44,8 @@ public class GameScreen extends Screen implements InputProcessor {
 	private Array<Card> openedCards = null;
 	private HashMap<Integer, CardImageData> cardImages;
 
-	private Vector3 screenShowPosition_L = new Vector3(0,0,100);
-	private Vector3 screenShowPosition_R = new Vector3(0,0,100);
+	private Vector3 screenShowPosition_L = new Vector3(0,0,99);
+	private Vector3 screenShowPosition_R = new Vector3(0,0,99);
 	
 	private Decal darkenDecal;
 	private Decal prizeDecal;
@@ -59,7 +63,20 @@ public class GameScreen extends Screen implements InputProcessor {
 	private DecalBatch decalBatch;
 	private ResizeableOrthographicCamera camera;
 	
+	private SlowButton exitButton;
+	
 	public GameScreen() {
+		
+		exitButton = new SlowButton("X", Statics.SKIN);
+		exitButton.addListener(new ChangeListener(){
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				Azalea.changeState(AppState.menu);
+			}
+		});
+		exitButton.setSize(Gdx.graphics.getWidth()*0.05f, Gdx.graphics.getWidth()*0.05f);
+		exitButton.setPosition(Gdx.graphics.getWidth()*0.001f*0, Gdx.graphics.getHeight()-Gdx.graphics.getWidth()*0.05f);
+		stage.addActor(exitButton);
 		
 		cardsInPlay = new Array<Card>();
 		openedCards = new Array<Card>();
@@ -71,7 +88,9 @@ public class GameScreen extends Screen implements InputProcessor {
 		
 		//Other gui stuff
 		wrongDecal = Decal.newDecal(new TextureRegion(Statics.WRONG), true);
+		
 		correctDecal = Decal.newDecal(new TextureRegion(Statics.CORRECT), true);
+		//correctDecal.setPosition(Gdx.graphics.getWidth()*0.35f, Gdx.graphics.getHeight()*0.35f, 110);
 		
 		TextureRegion darken = new TextureRegion(Statics.DARKEN_MASK);
 		prizeDecal = Decal.newDecal(darken, true);
@@ -238,7 +257,9 @@ public class GameScreen extends Screen implements InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 		Gdx.gl.glDisable(GL20.GL_CULL_FACE);
 		spriteBatch.begin();
-		spriteBatch.draw(Statics.PLAYGROUND_BACKGROUND, 0, 0, 1280, 800);
+			spriteBatch.setColor(1, 1, 1, 1);
+			spriteBatch.draw(Statics.PLAYGROUND_BACKGROUND, 0, 0, 1280, 800);
+			exitButton.draw(spriteBatch, 0.7f);
 		spriteBatch.end();
 		Gdx.gl.glEnable(GL20.GL_CULL_FACE);
 		
@@ -256,6 +277,7 @@ public class GameScreen extends Screen implements InputProcessor {
 		Color cf = darkenDecal.getColor();
 		
 		switch (currentState) {
+		
 			case show_success: //Set prize image as the target and show it
 				if(transition > 0){
 					for(Card c : openedCards){
@@ -269,7 +291,13 @@ public class GameScreen extends Screen implements InputProcessor {
 				}
 				decalBatch.add(darkenDecal);
 				decalBatch.add(prizeDecal);
+				
+				correctDecal.setPosition(Gdx.graphics.getWidth()*0.4f, -Gdx.graphics.getHeight()*0.38f, cardSize*2);
+				correctDecal.setScale(0.2f+(2+(float)Math.sin(Gdx.graphics.getFrameId()*0.1f))*0.1f);
+				decalBatch.add(correctDecal);
+				
 				break;
+				
 			case hide:
 				if(transition > 0){			
 					cf.a = transition;
@@ -304,6 +332,7 @@ public class GameScreen extends Screen implements InputProcessor {
 				openedCards.get(1).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler*0.75f;
 				openedCards.get(0).zoom_amount = (1-transition)*(1/cardSize)*Statics.cardScaler*0.75f;
 				break;
+				
 			case end:
 				decalBatch.add(winDecal);
 				wrongDecal.setScale(0.5f+(2+(float)Math.sin(Gdx.graphics.getFrameId()*0.1f))*0.1f);
@@ -315,11 +344,16 @@ public class GameScreen extends Screen implements InputProcessor {
 		
 		decalBatch.flush();
 		
+		stage.act(Gdx.graphics.getDeltaTime());
+		stage.draw();
+		
 	}
 	
 	@Override
 	public void resize(int width, int height) {
-	
+		
+		//stage.getViewport().update(width, height, false);
+		
 		camera.updateViewport();
 		camera.near = 0.01f;
 		camera.far = 1000f;
@@ -337,14 +371,12 @@ public class GameScreen extends Screen implements InputProcessor {
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
-
+		stage.dispose();
 	}
 
 	@Override
 	public void pause() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -437,7 +469,7 @@ public class GameScreen extends Screen implements InputProcessor {
 				break;
 		}
 		
-		return true;
+		return stage.touchDown(screenX, screenY, pointer, button);
 
 	}
 	
@@ -446,49 +478,42 @@ public class GameScreen extends Screen implements InputProcessor {
 		//Vector3 tp3 = new Vector3(screenX, screenY, 1);
 		//camera.unproject(tp3);
 		//if(currentScreen != null) currentScreen.touchUp(tp3.x, tp3.y, pointer);
-		return false;
+		return stage.touchUp(screenX, screenY, pointer, button);
 	}
 
 	@Override
-	public boolean keyDown(int keycode) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean keyDown(int keyCode) {
+		return stage.keyDown(keyCode);
 	}
 
 	@Override
-	public boolean keyUp(int keycode) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean keyUp(int keyCode) {
+		return stage.keyUp(keyCode);
 	}
 
 	@Override
 	public boolean keyTyped(char character) {
-		// TODO Auto-generated method stub
-		return false;
+		return stage.keyTyped(character);
 	}
 
 	@Override
 	public boolean touchDragged(int screenX, int screenY, int pointer) {
-		// TODO Auto-generated method stub
-		return false;
+		return stage.touchDragged(screenX, screenY, pointer);
 	}
 
 	@Override
 	public boolean mouseMoved(int screenX, int screenY) {
-		// TODO Auto-generated method stub
-		return false;
+		return stage.mouseMoved(screenX, screenY);
 	}
 
 	@Override
 	public boolean scrolled(int amount) {
-		// TODO Auto-generated method stub
-		return false;
+		return stage.scrolled(amount);
 	}
 
 	@Override
 	public void touchDown(float x, float y, int id) {
-		// TODO Auto-generated method stub
-		
+		//stage.touchDown(x,y,id,0);
 	}
 
 	@Override

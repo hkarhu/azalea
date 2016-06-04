@@ -1,5 +1,6 @@
 package fi.uef.azalea;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Blending;
@@ -7,6 +8,7 @@ import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.PixmapIO;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -35,7 +37,7 @@ public class CardSet extends Table {
 	private Drawable labelDrawableFront;
 	
 	private boolean selected = false;
-	private final TextButton selectButton;
+	public final TextButton selectButton;
 	private final Label cardAmountLabel;
 	
 	public CardSet(FileHandle dataFolder) {
@@ -60,7 +62,7 @@ public class CardSet extends Table {
 		
 		cardAmountLabel = new Label(amountString, Statics.SKIN);
 		
-		this.add(selectButton).pad(8).size(150, 100).align(Align.left);
+		this.add(selectButton).pad(8).size(Gdx.graphics.getWidth()*0.16f, Gdx.graphics.getWidth()*0.08f).align(Align.left);
 		this.add(new Label(title, Statics.SKIN)).align(Align.left).expand().fill(); //TODO
 		this.add(cardAmountLabel).align(Align.bottomRight).padRight(30).padBottom(20).expandX(); //TODO
 		
@@ -233,15 +235,23 @@ public class CardSet extends Table {
 		//Label
 		if(labelDrawableFront != null){
 			float sizeScaler = 0.8f/(labelDrawableFront.getMinHeight()/getHeight());
-			float shadowShift = 8;
+			//float shadowShift = 8;
 			float yShift = (getHeight()-(labelDrawableFront.getMinHeight()*sizeScaler))*0.5f;
-			float xShift = 200;
+			float xShift = Gdx.graphics.getWidth()*0.18f;
+			
+			
 			
 			//batch.setColor(0,0,0,0.8f);
 			//labelDrawableFront.draw(batch, x+xShift+shadowShift, y+yShift-shadowShift, labelDrawableFront.getMinWidth()*sizeScaler, labelDrawableFront.getMinHeight()*sizeScaler);
 			batch.setColor(1,1,1,1);
 			labelDrawableFront.draw(batch, x+xShift, y+yShift, labelDrawableFront.getMinWidth()*sizeScaler, labelDrawableFront.getMinHeight()*sizeScaler);
+			
+			//BitmapFont f = Statics.SKIN.getFont("large-font");
+			//f.setColor(0,0,0,1);
+			//f.draw(batch, title, x+xShift, y+yShift+3*f.getXHeight());
 		}
+		
+		
 		
 	}
 
@@ -255,6 +265,10 @@ public class CardSet extends Table {
 
 	public boolean hasSavedData() {
 		return dataFolder.exists();
+	}
+
+	public void setTitle(String text) {
+		this.title = text;
 	}
 
 }

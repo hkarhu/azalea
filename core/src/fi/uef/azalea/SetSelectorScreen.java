@@ -36,7 +36,6 @@ public abstract class SetSelectorScreen extends Screen {
 		if(Statics.DEBUG) stage.setDebugAll(true);
 
 		content = new Table();
-		content.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG)));
 		
 		cardListTable = new Table();
 		
@@ -47,6 +46,7 @@ public abstract class SetSelectorScreen extends Screen {
 		//cardSetScrollPane.setScrollBarPositions(true, true);
 		//cardSetScrollPane.setupFadeScrollBars(1, 1);
 		cardSetScrollPane.setFadeScrollBars(false);
+		//cardListTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
 
 		cancelButton = new TextButton("Takaisin", Statics.SKIN); //TODO
 		cancelButton.addListener(new ChangeListener(){
@@ -57,25 +57,8 @@ public abstract class SetSelectorScreen extends Screen {
 		});
 
 	}
-
-	protected void reloadCardSets() {
-		cardSets.clear();
-		cardListTable.clear();
-
-		FileHandle[] files = Gdx.files.local("sets/").list(); //TODO: put strings into statics
-		if (files.length > 0){
-			for (FileHandle file : files) {
-				CardSet c = new CardSet(file);
-				try {
-					c.loadData();
-				} catch (SerializationException e){
-					continue;
-				}
-				cardSets.add(c);
-			}
-		}
-
-	}
+	
+	protected abstract void reloadCardSets();
 
 	@Override
 	public void init() {

@@ -11,8 +11,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 public class Statics {
 
-	public static final String TITLE = "Azalea 0.2b";
+	public static final String TITLE = "Muistipeli (Azalea 0.7b)";
 	public static final boolean DEBUG = false;
+
+	public static final float MAX_PRESS_DELAY = 1.5f;
 	
 	public static final int DEFAULT_WIDTH = 1280;
 	public static final int DEFAULT_HEIGHT = 800;
@@ -28,7 +30,6 @@ public class Statics {
 	public static final float showMargin = 10f; //Margin when large preview of wrong pair shown
 	public static final float screenMargin = 32f; //How much space between the screen and card matrix
 	
-	public static Pixmap CARD_MASK_PIXMAP = new Pixmap(Gdx.files.internal("card_mask.png"));
 	public static Skin SKIN = new Skin(Gdx.files.internal("uiskin.json"));
 	public static final Color SET_DARKEN_TINT = new Color(0, 0, 0, 0.8f);
 	
@@ -37,20 +38,20 @@ public class Statics {
 	public static final float REL_BUTTON_HEIGHT = 0.07f;
 	public static final float REL_ITEM_PADDING = 0.015f;
 	
-	
+	//TODO: Texture atlas plz~
 	public static Texture TEX_CARD_EMPTY = new Texture(Gdx.files.internal("card_new.png"));
 	public static Texture TEX_NEW_CARD_BUTTON_UP = new Texture(Gdx.files.internal("card_new.png"));
 	public static Texture TEX_NEW_CARD_BUTTON_DOWN = new Texture(Gdx.files.internal("card_new.png"));
 	public static Texture TEX_WIN = new Texture(Gdx.files.internal("win.png"));
 	
-	public static Texture TEX_ICON_ERASE = new Texture(Gdx.files.internal("icon_erase.png"));
-	public static Texture TEX_ICON_DRAW = new Texture(Gdx.files.internal("icon_draw.png"));
-	public static Texture TEX_ICON_CLEAR = new Texture(Gdx.files.internal("icon_clear.png"));
-	public static Texture TEX_ICON_TEXT = new Texture(Gdx.files.internal("icon_text.png"));
+//	public static Texture TEX_ICON_ERASE = new Texture(Gdx.files.internal("icon_erase.png"));
+//	public static Texture TEX_ICON_DRAW = new Texture(Gdx.files.internal("icon_draw.png"));
+//	public static Texture TEX_ICON_CLEAR = new Texture(Gdx.files.internal("icon_clear.png"));
+//	public static Texture TEX_ICON_TEXT = new Texture(Gdx.files.internal("icon_text.png"));
 	
-	public static Texture TEX_LISTBG = new Texture(Gdx.files.internal("list_background.png"));
-	public static Texture TEX_MENUBG = new Texture(Gdx.files.internal("texture_leather.png"));
-	public static Texture TEX_TITLEBG = new Texture(Gdx.files.internal("texture_paper.png"));
+	public static Texture TEX_LISTBG = new Texture(Gdx.files.internal("texture_paper.png"));
+	public static Texture TEX_MENUBG = new Texture(Gdx.files.internal("texture_wood_light.png"));
+	public static Texture TEX_TITLEBG = new Texture(Gdx.files.internal("texture_leather.png"));
 	
 	public static Texture MENU = new Texture(Gdx.files.internal("menu.png"));
 	public static Texture CORRECT = new Texture(Gdx.files.internal("right.png"));
@@ -59,14 +60,12 @@ public class Statics {
 	public static Texture PLAYGROUND_BACKGROUND = new Texture(Gdx.files.internal("gray_bg.png"));
 	public static Texture IMAGE_FULLVIEW_BACKGROUND = new Texture(Gdx.files.internal("gray_bg.png"));
 	public static Texture DARKEN_MASK = new Texture(Gdx.files.internal("darkenmask.png"));
-	public static Texture LOADING = new Texture(Gdx.files.internal("load.png"));	
 	public static Texture TEX_TITLE_HELP = new Texture(Gdx.files.internal("title_help.png"));
 	
 	public static TextureRegion TEXREGION_TITLE_EMPTY = new TextureRegion(new Texture(Gdx.files.internal("deck_label_new.png")));
 	public static TextureRegion CARD_BACK = new TextureRegion(new Texture(Gdx.files.internal("card_back.png")));
 	
-	public static TextureRegion EXIT_TEX = new TextureRegion(new Texture(Gdx.files.internal("quit.png")));
-	
+	//TODO: Language support much?
 	public static String STRING_EDIT_SET = "";
 	public static String STRING_SELECT_SET = "";
 	public static String STRING_PLAY_BUTTON = "";
@@ -83,7 +82,6 @@ public class Statics {
 	}
 	
 	public static void dispose(){
-		CARD_MASK_PIXMAP.dispose();
 		
 		TEX_CARD_EMPTY.dispose();
 		TEX_NEW_CARD_BUTTON_UP.dispose();

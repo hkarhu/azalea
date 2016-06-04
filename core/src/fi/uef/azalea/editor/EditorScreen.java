@@ -14,6 +14,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.ScrollPane;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
@@ -26,6 +27,7 @@ import fi.uef.azalea.Azalea.AppState;
 import fi.uef.azalea.CardImageData;
 import fi.uef.azalea.CardSet;
 import fi.uef.azalea.Screen;
+import fi.uef.azalea.SlowButton;
 import fi.uef.azalea.Statics;
 
 public class EditorScreen extends Screen {
@@ -41,8 +43,8 @@ public class EditorScreen extends Screen {
 	private EditMode currentMode = EditMode.edit_set;
 	
 	private final Dialog cardAddFailDialog;
-	
-	
+	private final Dialog newCardDialog;
+	private final Dialog textingDialog;
 		
 	private CardSet editableCardSet;
 	private CardImageData editableCard;
@@ -51,18 +53,32 @@ public class EditorScreen extends Screen {
 		
 		cardAddFailDialog = new Dialog("Kuva oli jo pakassa!", Statics.SKIN, "default"); //TODO
 		Label failLabel = new Label("Et voi lisätä samaa kuvaa kahta kertaa.\nMuutenhan pelistä tulisi ihan hassu.", Statics.SKIN, "medium-font", Color.WHITE);
-		TextButton failOKButton = new TextButton("Hups, anteeksi!", Statics.SKIN); //TODO
+		TextButton failOKButton = new TextButton("OK", Statics.SKIN); //TODO
 		failOKButton.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				cardAddFailDialog.hide();
 			}
 		});
-		cardAddFailDialog.setSize(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getHeight()*0.5f);
 		cardAddFailDialog.getButtonTable().add(failOKButton);
 		cardAddFailDialog.getContentTable().add(failLabel);
+
 		
-		final Dialog newCardDialog = new Dialog("Haetaanko kuva kameralla vai laitteen muistista?", Statics.SKIN, "default"); //TODO
+		textingDialog = new Dialog("Syötä otsikko", Statics.SKIN, "default"); //TODO
+		final TextField textingField = new TextField("", Statics.SKIN);
+		TextButton textOKButton = new TextButton("OK", Statics.SKIN); //TODO
+		textOKButton.addListener(new ChangeListener(){
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				editableCardSet.setTitle(textingField.getText());
+				labelEditor.stampText(textingField.getText());
+				textingDialog.hide();
+			}
+		});
+		textingDialog.getButtonTable().add(textOKButton);
+		textingDialog.getContentTable().add(textingField).width(Gdx.graphics.getWidth()*0.8f).expandX();
+		
+		newCardDialog = new Dialog("Haetaanko kuva kameralla vai laitteen muistista?", Statics.SKIN, "default"); //TODO
 		
 		TextButton cameraButton = new TextButton("Kamerasta", Statics.SKIN); //TODO
 		cameraButton.addListener(new ChangeListener(){
@@ -113,24 +129,14 @@ public class EditorScreen extends Screen {
 		cardScrollPane.setFadeScrollBars(false);
 		Button doneButton = new TextButton("Valmis", Statics.SKIN); //TODO
 
-		Button editLabelButton = new TextButton("Muokkaa otsikkoa", Statics.SKIN); //TODO
-		editLabelButton.addListener(new ChangeListener(){
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				
-			}
-		});
+//		Button editLabelButton = new TextButton("Muokkaa otsikkoa", Statics.SKIN); //TODO
+//		editLabelButton.addListener(new ChangeListener(){
+//			@Override
+//			public void changed(ChangeEvent event, Actor actor) {
+//				
+//			}
+//		});
 		
-		deleteButton = new TextButton("Poista tämä pakka", Statics.SKIN); //TODO
-		deleteButton.addListener(new ChangeListener(){
-			@Override
-			public void changed(ChangeEvent event, Actor actor) {
-				if(editableCardSet != null){
-					editableCardSet.deleteData();
-					Azalea.changeState(AppState.select_edit);
-				}
-			}
-		});
 		//doneButton.setDisabled(true);
 		//doneButton.setVisible(false);
 		
@@ -144,57 +150,58 @@ public class EditorScreen extends Screen {
 				Azalea.changeState(AppState.select_edit);
 			}
 		});
-		
-		TextureRegion eraseDrawable = new TextureRegion(Statics.TEX_ICON_ERASE);
-		TextureRegion drawDrawable = new TextureRegion(Statics.TEX_ICON_DRAW);
-		TextureRegion clearDrawable = new TextureRegion(Statics.TEX_ICON_CLEAR);
 
+		labelEditor = new LabelEditorActor();
+		
 		final TextButton buttonErase = new TextButton("Kumita", Statics.SKIN, "toggle");
 		final TextButton buttonDraw = new TextButton("Piirrä", Statics.SKIN, "toggle");
-//		final Button buttonErase = new LogoButton(eraseDrawable, Statics.SKIN);
-//		final Button buttonDraw = new LogoButton(drawDrawable, Statics.SKIN);
-		final Button buttonClear = new LogoButton(clearDrawable, Statics.SKIN);
+		final SlowButton buttonClear = new SlowButton("Tyhjennä", Statics.SKIN);
+		final TextButton buttonText = new TextButton("Tekstaa", Statics.SKIN);
 		
-		buttonErase.setProgrammaticChangeEvents(false);
+		ButtonGroup<TextButton> toolButtonGroup = new ButtonGroup<TextButton>(buttonErase, buttonDraw);
+		toolButtonGroup.setMaxCheckCount(1);
+		
 		buttonErase.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				labelEditor.setErase(true);
-				buttonErase.setChecked(!buttonErase.isChecked());
-				buttonDraw.setChecked(false);
 			}
 		});
 		
-		buttonDraw.setProgrammaticChangeEvents(false);
 		buttonDraw.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				labelEditor.setErase(false);
-				buttonDraw.setChecked(!buttonDraw.isChecked());
-				buttonErase.setChecked(false);
 			}
 		});
+		buttonDraw.setChecked(true);
 		
+		buttonClear.setProgrammaticChangeEvents(false);
 		buttonClear.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
 				labelEditor.clearTexture();
-				buttonDraw.setChecked(false);
-				buttonErase.setChecked(false);
+			}
+		});
+		
+		buttonText.addListener(new ChangeListener(){
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				textingDialog.show(editSetStage);
 			}
 		});
 		
 		Table editTitleToolsTable = new Table();
-		editTitleToolsTable.add(buttonDraw).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*0.75f*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
+		editTitleToolsTable.add(buttonDraw).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()*0.75f).align(Align.left).expand();
 		editTitleToolsTable.row();
-		editTitleToolsTable.add(buttonErase).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*0.75f*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
+		editTitleToolsTable.add(buttonErase).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()*0.75f).align(Align.left).expand();
 		editTitleToolsTable.row();
-		editTitleToolsTable.add(buttonClear).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*0.75f*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.right).expand();
+		editTitleToolsTable.add(buttonText).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()*0.75f).align(Align.left).expand();
+		editTitleToolsTable.row();
+		editTitleToolsTable.add(buttonClear).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(),Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()*0.75f).align(Align.left).expand();		
 		
-		
-		labelEditor = new LabelEditorActor();
 		Table editTitleTable = new Table();
-		editTitleTable.add(labelEditor).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.2f).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.center).expandX();
+		editTitleTable.add(labelEditor).size(Gdx.graphics.getWidth()*0.8f, Gdx.graphics.getWidth()*0.2f).pad(Statics.REL_ITEM_PADDING*0.5f*Gdx.graphics.getWidth()).align(Align.center).expandX();
 		editTitleTable.add(editTitleToolsTable).align(Align.left).expandX();
 		//editTitleTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
 		
@@ -226,7 +233,7 @@ public class EditorScreen extends Screen {
 		cardTable.add(newCardCreator).size(0.234f*Gdx.graphics.getWidth(), 0.234f*Gdx.graphics.getWidth()).pad(32);
 		for(final CardImageData c : editableCardSet.getCards()){
 			final EditorCard ec = new EditorCard(c);
-			Button del = new TextButton("Poista", Statics.SKIN); //TODO
+			Button del = new SlowButton("Poista", Statics.SKIN); //TODO
 			ec.add(del).align(Align.top).height(80).expand();
 			del.addListener(new ChangeListener() {
 				@Override
@@ -236,13 +243,6 @@ public class EditorScreen extends Screen {
 				}
 			});
 			cardTable.add(ec).size(0.234f*Gdx.graphics.getWidth(), 0.234f*Gdx.graphics.getWidth()).pad(32).align(Align.center);
-		}
-		if(!editableCardSet.hasSavedData()){
-			deleteButton.setVisible(false);
-			deleteButton.setDisabled(true);
-		} else {
-			deleteButton.setVisible(true);
-			deleteButton.setDisabled(false);
 		}
 	}
 	

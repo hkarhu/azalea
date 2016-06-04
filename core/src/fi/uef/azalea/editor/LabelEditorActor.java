@@ -1,17 +1,21 @@
 package fi.uef.azalea.editor;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Blending;
 import com.badlogic.gdx.graphics.Pixmap.Filter;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
-import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
+import com.badlogic.gdx.utils.ScreenUtils;
 
 import fi.uef.azalea.Statics;
 
@@ -94,6 +98,48 @@ public class LabelEditorActor extends Actor {
 		}
 		
 		return true;
+	}
+	
+
+
+	public void stampText(String text){
+
+		//TODO: night time copypaste code, check, possible refactor
+		SpriteBatch sp = new SpriteBatch();
+		BitmapFont bmf = new BitmapFont(Gdx.files.internal("large-font.fnt"), Statics.SKIN.getFont("large-font").getRegion(), true);
+		bmf.getData().setScale(labelTexturePixmap.getHeight()*0.01f,  labelTexturePixmap.getWidth()*0.01f);
+		FrameBuffer m_fbo = new FrameBuffer(Format.RGBA8888, labelTexturePixmap.getWidth(), labelTexturePixmap.getHeight(), false);
+
+		m_fbo.begin();
+			Gdx.gl.glClearColor(0,0,0,0);
+			Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+			sp.begin();
+				bmf.setColor(0, 0, 0, 1);
+				bmf.draw(sp, text, labelTexturePixmap.getWidth()*0.025f, bmf.getXHeight()*0.5f);
+			sp.end();
+			Pixmap p = ScreenUtils.getFrameBufferPixmap(0,0,labelTexturePixmap.getWidth(), labelTexturePixmap.getHeight());
+		m_fbo.end();
+
+		m_fbo.dispose();
+		sp.dispose();
+		bmf.dispose();	
+		labelTexturePixmap.drawPixmap(p, 0, 0, p.getWidth(), p.getHeight(), 0, 0, labelTexturePixmap.getWidth(), labelTexturePixmap.getHeight());
+		
+		/* Works only on desktop ;-;
+		BufferedImage bi = new BufferedImage(labelTexturePixmap.getWidth(), labelTexturePixmap.getHeight(), BufferedImage.TYPE_4BYTE_ABGR);
+		Graphics2D g = (Graphics2D)bi.getGraphics();
+		int fontsize=130;
+		g.setFont(new Font("Arial", Font.BOLD, fontsize));
+		g.setColor(Color.white);
+		g.drawString(text, 30, labelTexturePixmap.getHeight() - (fontsize/2));
+		for(int y=0; y < labelTexturePixmap.getHeight(); y++)
+		for(int x=0; x < labelTexturePixmap.getWidth(); x++){
+			if(bi.getRGB(x, y) < 0) labelTexturePixmap.drawPixel(x, y, 0x000000FF);
+		}
+		*/
+		
+		labelEditTexture.draw(labelTexturePixmap, 0,0);
+		emptyTexture = false;
 	}
 	
 	public void setEdit(boolean edit){

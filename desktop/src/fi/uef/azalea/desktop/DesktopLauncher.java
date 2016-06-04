@@ -3,6 +3,7 @@ package fi.uef.azalea.desktop;
 import java.awt.Canvas;
 
 import javax.swing.JFrame;
+import javax.swing.UIManager;
 
 import com.badlogic.gdx.Files.FileType;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
@@ -24,10 +25,23 @@ public class DesktopLauncher {
 		Canvas canvas = new Canvas();
 		JFrame frame = new JFrame();
 		
+		//Decoration stuff
+		JFrame.setDefaultLookAndFeelDecorated(true);
+		try {
+			System.out.println("Setting look and feel");
+			if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+				// windows-support so doesn't look ugly
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			}
+		} catch (Exception e) {
+			System.err.println("Unable to set LookAndFeel");
+		}
+		
 		Azalea a = new Azalea(new DesktopPlatformBridge(frame));
 		new LwjglApplication(a, config, canvas);
 	    
 	    frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+	    frame.setTitle(Statics.TITLE);
 	    frame.add( canvas );
 	    frame.setSize( config.width, config.height );
 	    frame.setLocationRelativeTo( null );
