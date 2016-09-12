@@ -444,7 +444,7 @@ public class GameScreen extends Screen implements InputProcessor {
 					}
 					if(allSame){
 						CardImageData d = cardImages.get(lastCard.getGroup());
-						prizeDecal.getTextureRegion().getTexture().dispose();
+						//prizeDecal.getTextureRegion().getTexture().dispose();
 						TextureRegion tr = d.getFullImageTexture();
 						prizeDecal.setTextureRegion(tr);
 						prizeDecal.setScale(1);

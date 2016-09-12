@@ -70,7 +70,6 @@ public class Statics {
 	public static String STRING_BACK_BUTTON = "";
 	
 	public static void loadTextures(){
-		//textures = new TextureAtlas(Gdx.files.internal("azalea_game.pack"));
 		MENU_BG = textureAtlas.findRegion("menu");
 		CORRECT = textureAtlas.findRegion("right");
 		WRONG = textureAtlas.findRegion("wrong");
@@ -85,23 +84,11 @@ public class Statics {
 		LABEL_EDIT_HELP = textureAtlas.findRegion("title_help");
 		LABEL_EDIT_BG = textureAtlas.findRegion("texture_paper");
 		NEW_CARD_UP = NEW_CARD_DOWN = textureAtlas.findRegion("card_new");
-
-	}
-	
-	static {
-		//PLAYGROUND_BACKGROUND.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		//PLAYGROUND_BACKGROUND.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
-		////DARKEN_MASK.setFilter(TextureFilter.Linear, TextureFilter.Linear);
-		//TEX_LISTBG.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
-		//TEX_MENUBG.setWrap(TextureWrap.Repeat, TextureWrap.Repeat);
 	}
 	
 	public static void dispose(){
-		
-		//TEX_CARD_EMPTY.dispose();
-		//TEX_WIN.dispose();
-		textureAtlas.dispose();
 		SKIN.dispose();
+		textureAtlas.dispose();
 	}
 	
 }

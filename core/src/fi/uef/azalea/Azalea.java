@@ -122,6 +122,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 		setEditSelector.dispose();
 		setGameSelector.dispose();
 		editorScreen.dispose();
+		Statics.dispose();
 		super.dispose();
 	}
 	
