@@ -22,7 +22,7 @@ public class MainMenu extends Screen {
 	public MainMenu() {
 
 		stage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-		Image background = new Image(Statics.MENU);
+		Image background = new Image(Statics.MENU_BG);
 		background.setBounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		Table t = new Table(Statics.SKIN);
 		quit = new TextButton("Lopeta", Statics.SKIN);

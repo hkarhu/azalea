@@ -42,10 +42,10 @@ public class SetEditSelectorScreen extends SetSelectorScreen {
 		Table titleRow = new Table(Statics.SKIN);
 		titleRow.add(cancelButton).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.left).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth());
 		titleRow.add(new Label("Muokkaa korttipakkoja", Statics.SKIN, "title")).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).expandX().align(Align.center);
-		titleRow.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_TITLEBG)));
+		titleRow.setBackground(Statics.TITLE_BG);
 		
 		content.setFillParent(true);
-		content.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
+		content.setBackground(Statics.EDIT_CONTENT_BG);
 		content.add(titleRow).height((Statics.REL_BUTTON_HEIGHT+Statics.REL_BUTTON_PADDING)*Gdx.graphics.getWidth()).growX();
 		content.row();
 		content.add(cardSetScrollPane).colspan(3).fill().expand();

@@ -519,7 +519,6 @@ public class GameScreen extends Screen implements InputProcessor {
 	@Override
 	public void touchUp(float x, float y, int id) {
 		// TODO Auto-generated method stub
-		
 	}
 
 

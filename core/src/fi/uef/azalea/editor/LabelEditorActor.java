@@ -27,12 +27,8 @@ public class LabelEditorActor extends Actor {
 	private boolean edit = true;
 	private boolean erase = false;
 	private boolean emptyTexture = true;
-	
-	private TextureRegion background;
 
 	public LabelEditorActor(){
-
-		background = new TextureRegion(Statics.TEX_LISTBG);
 		
 		labelTexturePixmap = new Pixmap(1024, 256, Format.RGBA8888);
 		labelEditTexture = new Texture(labelTexturePixmap);
@@ -104,6 +100,8 @@ public class LabelEditorActor extends Actor {
 
 	public void stampText(String text){
 
+		clearTexture();
+		
 		//TODO: night time copypaste code, check, possible refactor
 		SpriteBatch sp = new SpriteBatch();
 		BitmapFont bmf = new BitmapFont(Gdx.files.internal("large-font.fnt"), Statics.SKIN.getFont("large-font").getRegion(), true);
@@ -164,12 +162,11 @@ public class LabelEditorActor extends Actor {
 	
 	@Override
 	public void draw(Batch batch, float alpha){
-		batch.draw(Statics.TEX_LISTBG, getX(), getY(), getWidth(), getHeight(), 0f, 0f, getWidth()*0.008f, getHeight()*0.008f);
-		if(emptyTexture) batch.draw(Statics.TEX_TITLE_HELP, getX()+getWidth()*0.5f, getY(), Statics.TEX_TITLE_HELP.getWidth()*(Gdx.graphics.getWidth()*0.0006f), Statics.TEX_TITLE_HELP.getHeight()*(Gdx.graphics.getHeight()*0.001f));
+		batch.draw(Statics.LABEL_EDIT_BG, getX(), getY(), getWidth(), getHeight());
+		if(emptyTexture) batch.draw(Statics.LABEL_EDIT_HELP, getX()+getWidth()*0.5f, getY(), Gdx.graphics.getWidth()*0.3072f, Gdx.graphics.getHeight()*0.256f);
 		batch.draw(labelEditTexture, getX(), getY(), getWidth(), getHeight());
 	}
 	
-
 	public void setEditableLabel(Pixmap p) {
 		System.out.println("Editable label set " + p);
 		Pixmap.setBlending(Blending.None);

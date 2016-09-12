@@ -22,8 +22,8 @@ public class SlowButton extends TextButton {
 	public void draw(Batch batch, float parentAlpha) {
 		super.draw(batch, parentAlpha);
 		if(isPressed()){
-			batch.setColor(1, 1, 1, 0.3f);
-			getSkin().getPatch("button_warn").draw(batch, getX(), getY(), 8+(longpress/Statics.MAX_PRESS_DELAY)*(getWidth()-8), getHeight());
+			batch.setColor(1, 1, 1, 0.75f);
+			getSkin().getPatch("button_warn").draw(batch, getX(), getY(), 30+(longpress/Statics.MAX_PRESS_DELAY)*(getWidth()-30), getHeight());
 			longpress += Gdx.graphics.getDeltaTime();
 			if(longpress > Statics.MAX_PRESS_DELAY){
 				longpress = Statics.MAX_PRESS_DELAY;

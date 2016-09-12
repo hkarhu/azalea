@@ -99,14 +99,14 @@ public class SetGameSelectorScreen extends SetSelectorScreen {
 		Table titleRow = new Table(Statics.SKIN);
 		titleRow.add(cancelButton).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).align(Align.left).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth());
 		titleRow.add(new Label("Valitse pelissä käytettävät korttipakat", Statics.SKIN, "title")).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).expandX().align(Align.center);
-		titleRow.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_TITLEBG)));
+		titleRow.setBackground(Statics.TITLE_BG);
 		
 		Table buttonRow = new Table(Statics.SKIN);
 		buttonRow.add(doneButton).size(Statics.REL_BUTTON_WIDTH*Gdx.graphics.getWidth(), Statics.REL_BUTTON_HEIGHT*Gdx.graphics.getWidth()).growX();
-		buttonRow.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_TITLEBG)));
+		buttonRow.setBackground(Statics.TITLE_BG);
 		
 		Table content = new Table();
-		content.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG)));
+		content.setBackground(Statics.SELECT_CONTENT_BG);
 		content.setFillParent(true);
 		content.add(titleRow).height((Statics.REL_BUTTON_HEIGHT+Statics.REL_BUTTON_PADDING)*Gdx.graphics.getWidth()).growX();
 		content.row();

@@ -35,6 +35,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 		if(!Gdx.files.local(Statics.CARD_IMAGE_CACHE).exists()) Gdx.files.local(Statics.CARD_IMAGE_CACHE).mkdirs();
 		
 		//Loading screen stuff
+		Statics.loadTextures();
 		//spriteBatch = new SpriteBatch();
 
 		Statics.SKIN.getFont("large-font").getData().setScale(Gdx.graphics.getWidth()*0.0006f);
@@ -71,6 +72,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	
 	//Toggle screens and handle diipadaapa
 	public static void changeState(AppState newState){
+		Statics.loadTextures();
 		//load_transition = 1;
 		switch (newState) {
 			case game:
@@ -132,6 +134,7 @@ public class Azalea extends ApplicationAdapter implements ApplicationListener {
 	@Override
 	public void resume() {
 		super.resume();
+		Statics.loadTextures();
 		if(currentScreen != null) currentScreen.resume();
 	}
 	

@@ -1,11 +1,16 @@
 package fi.uef.azalea.editor;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.ButtonGroup;
@@ -49,7 +54,13 @@ public class EditorScreen extends Screen {
 	private CardSet editableCardSet;
 	private CardImageData editableCard;
 	
+	//private TextureRegionDrawable button_up;
+	//private TextureRegionDrawable button_down;
+	
 	public EditorScreen() {
+		
+		//button_up = new TextureRegionDrawable(Statics.textures.findRegion(""));
+		//button_down = new TextureRegionDrawable(Statics.textures.findRegion(""));
 		
 		cardAddFailDialog = new Dialog("Kuva oli jo pakassa!", Statics.SKIN, "default"); //TODO
 		Label failLabel = new Label("Et voi lisätä samaa kuvaa kahta kertaa.\nMuutenhan pelistä tulisi ihan hassu.", Statics.SKIN, "medium-font", Color.WHITE);
@@ -65,8 +76,8 @@ public class EditorScreen extends Screen {
 
 		
 		textingDialog = new Dialog("Syötä otsikko", Statics.SKIN, "default"); //TODO
+		final TextButton textOKButton = new TextButton("OK", Statics.SKIN); //TODO
 		final TextField textingField = new TextField("", Statics.SKIN);
-		TextButton textOKButton = new TextButton("OK", Statics.SKIN); //TODO
 		textOKButton.addListener(new ChangeListener(){
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
@@ -75,6 +86,24 @@ public class EditorScreen extends Screen {
 				textingDialog.hide();
 			}
 		});
+		
+		//Emulate OK press if input got ENTER
+		textingField.addListener(new InputListener(){
+			@Override
+			public boolean keyUp(InputEvent event, int keycode) {
+				if(keycode == Keys.ENTER){
+					InputEvent ie = new InputEvent();
+					ie.setType(InputEvent.Type.touchDown);
+					textOKButton.fire(ie);
+					ie = new InputEvent();
+					ie.setType(InputEvent.Type.touchUp);
+					textOKButton.fire(ie);					
+				}
+				return super.keyUp(event, keycode);
+			}
+		});
+		
+
 		textingDialog.getButtonTable().add(textOKButton);
 		textingDialog.getContentTable().add(textingField).width(Gdx.graphics.getWidth()*0.8f).expandX();
 		
@@ -100,11 +129,20 @@ public class EditorScreen extends Screen {
 			}
 		});
 		
+		TextButton cancelButton = new TextButton("Peruuta", Statics.SKIN); //TODO
+		cancelButton.addListener(new ChangeListener(){
+			@Override
+			public void changed(ChangeEvent event, Actor actor) {
+				newCardDialog.hide();
+			}
+		});
+		
 		newCardDialog.getButtonTable().add(storageButton);
 		newCardDialog.getButtonTable().add(cameraButton);
+		newCardDialog.getButtonTable().add(cancelButton);
 		
-		newCardCreator = new Button(new TextureRegionDrawable(new TextureRegion(Statics.TEX_NEW_CARD_BUTTON_UP)),
-						 			new TextureRegionDrawable(new TextureRegion(Statics.TEX_NEW_CARD_BUTTON_DOWN)));
+		
+		newCardCreator = new Button(new TextureRegionDrawable(Statics.NEW_CARD_UP), new TextureRegionDrawable(Statics.NEW_CARD_DOWN));
 		newCardCreator.addListener(new ChangeListener() {
 			@Override
 			public void changed(ChangeEvent event, Actor actor) {
@@ -116,7 +154,7 @@ public class EditorScreen extends Screen {
 				}
 			}
 		});
-
+		
 		editSetStage = new Stage(new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 		cardTable = new Table();
 		ScrollPane cardScrollPane = new ScrollPane(cardTable);
@@ -206,7 +244,7 @@ public class EditorScreen extends Screen {
 		//editTitleTable.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_LISTBG)));
 		
 		Table mainEditContent = new Table();
-		mainEditContent.setBackground(new TiledDrawable(new TextureRegion(Statics.TEX_MENUBG)));
+		mainEditContent.setBackground(Statics.DECK_EDITOR_BG);
 		mainEditContent.setFillParent(true);
 		mainEditContent.add(editTitleTable).colspan(2).pad(Statics.REL_BUTTON_PADDING*Gdx.graphics.getWidth()).height(Gdx.graphics.getWidth()*0.2f).pad(Statics.REL_ITEM_PADDING*Gdx.graphics.getWidth()).align(Align.left).growX();
 		mainEditContent.row();

@@ -1,0 +1,101 @@
+
+azalea_game.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+menu
+  rotate: false
+  xy: 1, 165
+  size: 1280, 800
+  orig: 1280, 800
+  offset: 0, 0
+  index: -1
+deck_label_new
+  rotate: false
+  xy: 1, 35
+  size: 1024, 128
+  orig: 1024, 128
+  offset: 0, 0
+  index: -1
+darkenmask
+  rotate: false
+  xy: 1, 1
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+win
+  rotate: false
+  xy: 1283, 427
+  size: 526, 538
+  orig: 526, 538
+  offset: 0, 0
+  index: -1
+wrong
+  rotate: false
+  xy: 1283, 32
+  size: 397, 393
+  orig: 397, 393
+  offset: 0, 0
+  index: -1
+right
+  rotate: false
+  xy: 1682, 76
+  size: 306, 349
+  orig: 306, 349
+  offset: 0, 0
+  index: -1
+
+azalea_game2.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+title_help
+  rotate: false
+  xy: 1, 561
+  size: 512, 256
+  orig: 512, 256
+  offset: 0, 0
+  index: -1
+gray_bg
+  rotate: false
+  xy: 1, 259
+  size: 450, 300
+  orig: 450, 300
+  offset: 0, 0
+  index: -1
+card_new
+  rotate: false
+  xy: 515, 561
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+texture_wood_light
+  rotate: false
+  xy: 1, 1
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+texture_leather
+  rotate: false
+  xy: 453, 303
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+card_back
+  rotate: false
+  xy: 259, 1
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+texture_paper
+  rotate: false
+  xy: 517, 45
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
